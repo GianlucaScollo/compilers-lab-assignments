@@ -1,0 +1,9 @@
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/intrinsics_gen.dir
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/omp_gen.dir
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/acc_gen.dir
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/ARMTargetParserTableGen.dir
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/AArch64TargetParserTableGen.dir
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/RISCVTargetParserTableGen.dir
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/LocalOpts.dir
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/edit_cache.dir
+/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/rebuild_cache.dir
