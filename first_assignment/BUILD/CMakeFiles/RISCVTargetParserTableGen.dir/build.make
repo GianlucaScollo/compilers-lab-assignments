@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/SRC
+CMAKE_SOURCE_DIR = /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/SRC
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD
+CMAKE_BINARY_DIR = /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD
 
 # Utility rule file for RISCVTargetParserTableGen.
 
@@ -81,6 +81,6 @@ CMakeFiles/RISCVTargetParserTableGen.dir/clean:
 .PHONY : CMakeFiles/RISCVTargetParserTableGen.dir/clean
 
 CMakeFiles/RISCVTargetParserTableGen.dir/depend:
-	cd /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/SRC /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/SRC /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles/RISCVTargetParserTableGen.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/SRC /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/SRC /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD/CMakeFiles/RISCVTargetParserTableGen.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/RISCVTargetParserTableGen.dir/depend
 

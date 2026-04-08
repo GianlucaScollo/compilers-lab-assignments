@@ -1,4 +1,4 @@
-# Install script for directory: /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/SRC
+# Install script for directory: /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/SRC
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,7 +45,7 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/install_local_manifest.txt"
+  file(WRITE "/home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -61,6 +61,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "/home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

@@ -6,19 +6,31 @@
 
 using namespace llvm;
 
+#define CONCAT_HELPER(pref, val, suf) pref ## val ## suf
+#define CREATE_FUNC_NAME(pref, val, suf) CONCAT_HELPER(pref, val, suf)
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#define STRUCTNAME FirstAssignment
+#define FLAGNAME first-assignment
+
 
 //-----------------------------------------------------------------------------
-// LocalOpts implementation
+// FirstAssignment implementation
 //-----------------------------------------------------------------------------
 
 namespace {
 
 // New PM implementation
-struct LocalOpts: PassInfoMixin<LocalOpts> {
+struct STRUCTNAME: PassInfoMixin<STRUCTNAME> {
   // Main entry point, takes IR unit to run the pass on (&F) and the
   // corresponding pass manager (to be queried if need be)
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
 
+    outs() << "nice\n";
+
+    /*
     for (auto Iter = F.begin(); Iter != F.end(); ++Iter) {
       BasicBlock &B = *Iter;
        // Preleviamo le prime due istruzioni del BB
@@ -77,7 +89,7 @@ struct LocalOpts: PassInfoMixin<LocalOpts> {
       // Controlla la documentazione e prova a rispondere.
       Inst1st.replaceAllUsesWith(NewInst);
     }
-
+    */
 
     return PreservedAnalyses::all();
   }
@@ -93,14 +105,14 @@ struct LocalOpts: PassInfoMixin<LocalOpts> {
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
-llvm::PassPluginLibraryInfo getLocalOptsPluginInfo() {
-  return {LLVM_PLUGIN_API_VERSION, "LocalOpts", LLVM_VERSION_STRING,
+llvm::PassPluginLibraryInfo CREATE_FUNC_NAME(get, STRUCTNAME, PluginInfo)() {
+  return {LLVM_PLUGIN_API_VERSION, STR(STRUCTNAME), LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
             PB.registerPipelineParsingCallback(
                 [](StringRef Name, FunctionPassManager &FPM,
                    ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "local-opts") {
-                    FPM.addPass(LocalOpts());
+                  if (Name == STR(FLAGNAME)) {
+                    FPM.addPass(STRUCTNAME());
                     return true;
                   }
                   return false;
@@ -109,9 +121,9 @@ llvm::PassPluginLibraryInfo getLocalOptsPluginInfo() {
 }
 
 // This is the core interface for pass plugins. It guarantees that 'opt' will
-// be able to recognize TestPass when added to the pass pipeline on the
-// command line, i.e. via '-passes=test-pass'
+// be able to recognize STRUCTNAME when added to the pass pipeline on the
+// command line, i.e. via '-passes=FLAGNAME'
 extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
-  return getLocalOptsPluginInfo();
+  return CREATE_FUNC_NAME(get, STRUCTNAME, PluginInfo)();
 }

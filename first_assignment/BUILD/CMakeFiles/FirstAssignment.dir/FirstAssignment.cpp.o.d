@@ -1,5 +1,5 @@
-CMakeFiles/LocalOpts.dir/LocalOpts.cpp.o: \
- /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/SRC/LocalOpts.cpp \
+CMakeFiles/FirstAssignment.dir/FirstAssignment.cpp.o: \
+ /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/SRC/FirstAssignment.cpp \
  /usr/include/stdc-predef.h \
  /home/gianluca/Scaricati/LLVM-19.1.7-Linux-X64/include/llvm/IR/LegacyPassManager.h \
  /home/gianluca/Scaricati/LLVM-19.1.7-Linux-X64/include/llvm/Support/CBindingWrapping.h \

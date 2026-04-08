@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/SRC
+CMAKE_SOURCE_DIR = /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/SRC
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD
+CMAKE_BINARY_DIR = /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD/CMakeFiles /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/BUILD/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/BUILD/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -195,41 +195,41 @@ RISCVTargetParserTableGen/fast:
 .PHONY : RISCVTargetParserTableGen/fast
 
 #=============================================================================
-# Target rules for targets named LocalOpts
+# Target rules for targets named FirstAssignment
 
 # Build rule for target.
-LocalOpts: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 LocalOpts
-.PHONY : LocalOpts
+FirstAssignment: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 FirstAssignment
+.PHONY : FirstAssignment
 
 # fast build rule for target.
-LocalOpts/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LocalOpts.dir/build.make CMakeFiles/LocalOpts.dir/build
-.PHONY : LocalOpts/fast
+FirstAssignment/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FirstAssignment.dir/build.make CMakeFiles/FirstAssignment.dir/build
+.PHONY : FirstAssignment/fast
 
-LocalOpts.o: LocalOpts.cpp.o
-.PHONY : LocalOpts.o
+FirstAssignment.o: FirstAssignment.cpp.o
+.PHONY : FirstAssignment.o
 
 # target to build an object file
-LocalOpts.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LocalOpts.dir/build.make CMakeFiles/LocalOpts.dir/LocalOpts.cpp.o
-.PHONY : LocalOpts.cpp.o
+FirstAssignment.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FirstAssignment.dir/build.make CMakeFiles/FirstAssignment.dir/FirstAssignment.cpp.o
+.PHONY : FirstAssignment.cpp.o
 
-LocalOpts.i: LocalOpts.cpp.i
-.PHONY : LocalOpts.i
+FirstAssignment.i: FirstAssignment.cpp.i
+.PHONY : FirstAssignment.i
 
 # target to preprocess a source file
-LocalOpts.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LocalOpts.dir/build.make CMakeFiles/LocalOpts.dir/LocalOpts.cpp.i
-.PHONY : LocalOpts.cpp.i
+FirstAssignment.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FirstAssignment.dir/build.make CMakeFiles/FirstAssignment.dir/FirstAssignment.cpp.i
+.PHONY : FirstAssignment.cpp.i
 
-LocalOpts.s: LocalOpts.cpp.s
-.PHONY : LocalOpts.s
+FirstAssignment.s: FirstAssignment.cpp.s
+.PHONY : FirstAssignment.s
 
 # target to generate assembly for a file
-LocalOpts.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/LocalOpts.dir/build.make CMakeFiles/LocalOpts.dir/LocalOpts.cpp.s
-.PHONY : LocalOpts.cpp.s
+FirstAssignment.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/FirstAssignment.dir/build.make CMakeFiles/FirstAssignment.dir/FirstAssignment.cpp.s
+.PHONY : FirstAssignment.cpp.s
 
 # Help Target
 help:
@@ -245,10 +245,10 @@ help:
 	@echo "... acc_gen"
 	@echo "... intrinsics_gen"
 	@echo "... omp_gen"
-	@echo "... LocalOpts"
-	@echo "... LocalOpts.o"
-	@echo "... LocalOpts.i"
-	@echo "... LocalOpts.s"
+	@echo "... FirstAssignment"
+	@echo "... FirstAssignment.o"
+	@echo "... FirstAssignment.i"
+	@echo "... FirstAssignment.s"
 .PHONY : help
 
 

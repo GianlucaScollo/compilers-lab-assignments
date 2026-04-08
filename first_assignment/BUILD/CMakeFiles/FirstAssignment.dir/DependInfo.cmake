@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/gianluca/cartella_file/Laboratori_Compilatori/Lab2/SRC/LocalOpts.cpp" "CMakeFiles/LocalOpts.dir/LocalOpts.cpp.o" "gcc" "CMakeFiles/LocalOpts.dir/LocalOpts.cpp.o.d"
+  "/home/gianluca/cartella_file/Laboratori_Compilatori/first_assignment/SRC/FirstAssignment.cpp" "CMakeFiles/FirstAssignment.dir/FirstAssignment.cpp.o" "gcc" "CMakeFiles/FirstAssignment.dir/FirstAssignment.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
