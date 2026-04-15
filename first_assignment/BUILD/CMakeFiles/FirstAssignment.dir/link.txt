@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -fno-rtti -shared -Wl,-soname,libFirstAssignment.so -o libFirstAssignment.so CMakeFiles/FirstAssignment.dir/FirstAssignment.cpp.o
