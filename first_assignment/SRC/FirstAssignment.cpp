@@ -6,90 +6,76 @@
 
 using namespace llvm;
 
-#define CONCAT_HELPER(pref, val, suf) pref ## val ## suf
-#define CREATE_FUNC_NAME(pref, val, suf) CONCAT_HELPER(pref, val, suf)
-
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
-#define STRUCTNAME FirstAssignment
-#define FLAGNAME first-assignment
-
-
 //-----------------------------------------------------------------------------
 // FirstAssignment implementation
 //-----------------------------------------------------------------------------
 
 namespace {
 
-// New PM implementation
-struct STRUCTNAME: PassInfoMixin<STRUCTNAME> {
+// AlgebraicIdentity implementation
+struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
   // Main entry point, takes IR unit to run the pass on (&F) and the
   // corresponding pass manager (to be queried if need be)
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
 
-    outs() << "nice\n";
+    // iterating the BBs of the function
+    for (auto IterBB = F.begin(); IterBB != F.end(); ++IterBB) {
 
-    /*
-    for (auto Iter = F.begin(); Iter != F.end(); ++Iter) {
-      BasicBlock &B = *Iter;
-       // Preleviamo le prime due istruzioni del BB
-      Instruction &Inst1st = *B.begin(), &Inst2nd = *(++B.begin());
+    	BasicBlock &B = *IterBB;
 
-      // L'indirizzo della prima istruzione deve essere uguale a quello del 
-      // primo operando della seconda istruzione (per costruzione dell'esempio)
-      assert(&Inst1st == Inst2nd.getOperand(0));
+	// iterating the instructions of the BB
+	for (auto IterINST = B.begin(); IterINST != B.end(); ++IterINST) {
 
-      // Stampa la prima istruzione
-      outs() << "PRIMA ISTRUZIONE: " << Inst1st << "\n";
-      // Stampa la prima istruzione come operando
-      outs() << "COME OPERANDO: ";
-      Inst1st.printAsOperand(outs(), false);
-      outs() << "\n";
+		// now we have a single instruction of a BB
+		Instruction &I = *IterINST;
 
-      // User-->Use-->Value
-      outs() << "I MIEI OPERANDI SONO:\n";
-      for (auto Iter = Inst1st.op_begin(); Iter != Inst1st.op_end(); ++Iter) {
-        Value *Operand = *Iter;
+		// then we can control if we can optimize it
 
-        if (Argument *Arg = dyn_cast<Argument>(Operand)) {
-          outs() << "\t" << *Arg << ": SONO L'ARGOMENTO N. " << Arg->getArgNo() 
-  	         <<" DELLA FUNZIONE " << Arg->getParent()->getName()
-                 << "\n";
+		// outs() << "Value of Opcode: " << I.getOpcode() << " | "<< I.getOpcodeName() << " (of this instruction: " << I << ")\n";
+
+		int flag = 0;
+		Value *op;
+
+		// check if the operation of the instruction is an add (13)
+		if (I.getOpcode() == 13) {
+			for (auto IterOp = I.op_begin(); IterOp != I.op_end(); ++IterOp) {
+				Value *Operand = *IterOp;
+				// check if it is a constant
+				if (ConstantInt *C = dyn_cast<ConstantInt>(Operand)) {
+					if (C->getValue() == 0) {
+						flag = 1;
+						op = Operand;
+					}
+				}
+			}
+		}
+		// check if the operation of the instruction is an mul (17)
+		if (I.getOpcode() == 17) {
+        for (auto IterOp = I.op_begin(); IterOp != I.op_end(); ++IterOp) {
+          Value *Operand = *IterOp;
+          // check if it is a constant
+          if (ConstantInt *C = dyn_cast<ConstantInt>(Operand)) {
+            if (C->getValue() == 1) {
+              flag = 1;
+              op = Operand;
+            }
+          }
         }
-        if (ConstantInt *C = dyn_cast<ConstantInt>(Operand)) {
-          outs() << "\t" << *C << ": SONO UNA COSTANTE INTERA DI VALORE " << C->getValue()
-                 << "\n";
-        }
       }
 
-      outs() << "LA LISTA DEI MIEI USERS:\n";
-      for (auto Iter = Inst1st.user_begin(); Iter != Inst1st.user_end(); ++Iter) {
-        //outs() << "\t" << *(dyn_cast<Instruction>(*Iter)) << "\n";
-	User *U = *Iter;
-        outs() << "\t" << *U << "\n";
-      }
-
-      // Qual è la differenza tra gli USERS e gli USES?
-      // Prova a vedere cosa succede se in Foo.ll la seconda istruzione diventa
-      // %4 = mul nsw i32 %3, %3
-      outs() << "E DEI MIEI USI:\n";
-      for (auto Iter = Inst1st.use_begin(); Iter != Inst1st.use_end(); ++Iter) {
-        //outs() << "\t" << *(dyn_cast<Instruction>(Iter->getUser())) << "\n";
-	Use &U = *Iter;
-        outs() << "\t" << *U.getUser() << "@operand" << U.getOperandNo() << "\n";
-      }
-
-      // Manipolazione delle istruzioni
-      Instruction *NewInst = BinaryOperator::Create(
-          Instruction::Add, Inst1st.getOperand(0), Inst1st.getOperand(0));
-
-      NewInst->insertAfter(&Inst1st);
-      // Si possono aggiornare le singole references separatamente?
-      // Controlla la documentazione e prova a rispondere.
-      Inst1st.replaceAllUsesWith(NewInst);
+		if (flag) {
+			// now i will replace all uses with the operand not null
+			auto op1 = I.getOperand(0);
+			auto op2 = I.getOperand(1);
+			if (op == op1) {
+				I.replaceAllUsesWith(op2);
+			}
+			else {
+				I.replaceAllUsesWith(op1);
+			}
+		}
+	}
     }
-    */
 
     return PreservedAnalyses::all();
   }
@@ -99,22 +85,71 @@ struct STRUCTNAME: PassInfoMixin<STRUCTNAME> {
   // all functions with optnone.
   static bool isRequired() { return true; }
 };
+
+// StrenghtReduction implementation
+struct StrenghtReduction: PassInfoMixin<StrenghtReduction> {
+  // Main entry point, takes IR unit to run the pass on (&F) and the
+  // corresponding pass manager (to be queried if need be)
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
+
+    return PreservedAnalyses::all();
+  }
+
+  // Without isRequired returning true, this pass will be skipped for functions
+  // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
+  // all functions with optnone.
+  static bool isRequired() { return true; }
+};
+
+// MultiInstructionOptimization implementation
+struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization> {
+  // Main entry point, takes IR unit to run the pass on (&F) and the
+  // corresponding pass manager (to be queried if need be)
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
+
+    return PreservedAnalyses::all();
+  }
+
+  // Without isRequired returning true, this pass will be skipped for functions
+  // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
+  // all functions with optnone.
+  static bool isRequired() { return true; }
+};
+
 } // namespace
 
 
+
 //-----------------------------------------------------------------------------
-// New PM Registration
-//-----------------------------------------------------------------------------
-llvm::PassPluginLibraryInfo CREATE_FUNC_NAME(get, STRUCTNAME, PluginInfo)() {
-  return {LLVM_PLUGIN_API_VERSION, STR(STRUCTNAME), LLVM_VERSION_STRING,
+
+llvm::PassPluginLibraryInfo getFirstAssignmentPluginInfo() {
+  return {LLVM_PLUGIN_API_VERSION, "FirstAssignment", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
             PB.registerPipelineParsingCallback(
                 [](StringRef Name, FunctionPassManager &FPM,
                    ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == STR(FLAGNAME)) {
-                    FPM.addPass(STRUCTNAME());
+		  // adding pass by the value of flag for algebraic identity opt
+                  if (Name == "alg-id") {
+                    FPM.addPass(AlgebraicIdentity());
                     return true;
                   }
+		  // adding pass by the value of flag for strenght reduction opt
+		  if (Name == "str-rd") {
+                    FPM.addPass(StrenghtReduction());
+                    return true;
+                  }
+		  // adding pass by the value of flag for multi instruction opt
+		  if (Name == "mul-ins-opt") {
+                    FPM.addPass(MultiInstructionOptimization());
+                    return true;
+                  }
+		  // flag for doing all the passes
+		  if ((Name == "A") or (Name == "all")) {
+		    FPM.addPass(AlgebraicIdentity());
+	            FPM.addPass(StrenghtReduction());
+		    FPM.addPass(MultiInstructionOptimization());
+                    return true;
+		  }
                   return false;
                 });
           }};
@@ -125,5 +160,5 @@ llvm::PassPluginLibraryInfo CREATE_FUNC_NAME(get, STRUCTNAME, PluginInfo)() {
 // command line, i.e. via '-passes=FLAGNAME'
 extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
-  return CREATE_FUNC_NAME(get, STRUCTNAME, PluginInfo)();
+  return getFirstAssignmentPluginInfo();
 }
