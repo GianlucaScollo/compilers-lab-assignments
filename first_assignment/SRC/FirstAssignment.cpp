@@ -23,58 +23,73 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
 
     	BasicBlock &B = *IterBB;
 
-	// iterating the instructions of the BB
-	for (auto IterINST = B.begin(); IterINST != B.end(); ++IterINST) {
+      // iterating the instructions of the BB
+      for (auto IterINST = B.begin(); IterINST != B.end(); ) {
 
-		// now we have a single instruction of a BB
-		Instruction &I = *IterINST;
+        // now we have a single instruction of a BB
+        Instruction &I = *IterINST;
 
-		// then we can control if we can optimize it
+        // then we can control if we can optimize it
 
-		// outs() << "Value of Opcode: " << I.getOpcode() << " | "<< I.getOpcodeName() << " (of this instruction: " << I << ")\n";
+        int flag = 0;
+        Value *operandToKeep = nullptr;
 
-		int flag = 0;
-		Value *op;
+        // check if the operation of the instruction is an add (13)
+        if (I.getOpcode() == 13) {
+          auto op1 = I.getOperand(0);
+          auto op2 = I.getOperand(1);
 
-		// check if the operation of the instruction is an add (13)
-		if (I.getOpcode() == 13) {
-			for (auto IterOp = I.op_begin(); IterOp != I.op_end(); ++IterOp) {
-				Value *Operand = *IterOp;
-				// check if it is a constant
-				if (ConstantInt *C = dyn_cast<ConstantInt>(Operand)) {
-					if (C->getValue() == 0) {
-						flag = 1;
-						op = Operand;
-					}
-				}
-			}
-		}
-		// check if the operation of the instruction is an mul (17)
-		if (I.getOpcode() == 17) {
-        for (auto IterOp = I.op_begin(); IterOp != I.op_end(); ++IterOp) {
-          Value *Operand = *IterOp;
-          // check if it is a constant
-          if (ConstantInt *C = dyn_cast<ConstantInt>(Operand)) {
-            if (C->getValue() == 1) {
+          // check if op1 is 0
+          if (ConstantInt *C = dyn_cast<ConstantInt>(op1)) {
+            if (C->getValue() == 0) {
               flag = 1;
-              op = Operand;
+              operandToKeep = op2;
+            }
+          }
+
+          // check if op2 is 0
+          if (ConstantInt *C = dyn_cast<ConstantInt>(op2)) {
+            if (C->getValue() == 0) {
+              flag = 1;
+              operandToKeep = op1;
             }
           }
         }
-      }
 
-		if (flag) {
-			// now i will replace all uses with the operand not null
-			auto op1 = I.getOperand(0);
-			auto op2 = I.getOperand(1);
-			if (op == op1) {
-				I.replaceAllUsesWith(op2);
-			}
-			else {
-				I.replaceAllUsesWith(op1);
-			}
-		}
-	}
+        // check if the operation of the instruction is an mul (17)
+        if (I.getOpcode() == 17) {
+          auto op1 = I.getOperand(0);
+          auto op2 = I.getOperand(1);
+
+          // check if op1 is 1
+          if (ConstantInt *C = dyn_cast<ConstantInt>(op1)) {
+            if (C->getValue() == 1) {
+              flag = 1;
+              operandToKeep = op2;
+            }
+          }
+
+          // check if op2 is 1
+          if (ConstantInt *C = dyn_cast<ConstantInt>(op2)) {
+            if (C->getValue() == 1) {
+              flag = 1;
+              operandToKeep = op1;
+            }
+          }
+        }
+
+        if (flag && operandToKeep) {
+          // now i will replace all uses of the instruction with the right operand
+          I.replaceAllUsesWith(operandToKeep);
+          // before the deletion of the instruction i will increment the iterator because i want a valid pointer for the next instruction
+          ++IterINST;
+          // now i can delete the instruction
+          I.eraseFromParent();
+        }
+        else {
+          ++IterINST;
+        }
+      }
     }
 
     return PreservedAnalyses::all();
@@ -124,35 +139,35 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
 
 llvm::PassPluginLibraryInfo getFirstAssignmentPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "FirstAssignment", LLVM_VERSION_STRING,
-          [](PassBuilder &PB) {
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-		  // adding pass by the value of flag for algebraic identity opt
-                  if (Name == "alg-id") {
-                    FPM.addPass(AlgebraicIdentity());
-                    return true;
-                  }
-		  // adding pass by the value of flag for strenght reduction opt
-		  if (Name == "str-rd") {
-                    FPM.addPass(StrenghtReduction());
-                    return true;
-                  }
-		  // adding pass by the value of flag for multi instruction opt
-		  if (Name == "mul-ins-opt") {
-                    FPM.addPass(MultiInstructionOptimization());
-                    return true;
-                  }
-		  // flag for doing all the passes
-		  if ((Name == "A") or (Name == "all")) {
-		    FPM.addPass(AlgebraicIdentity());
-	            FPM.addPass(StrenghtReduction());
-		    FPM.addPass(MultiInstructionOptimization());
-                    return true;
-		  }
-                  return false;
-                });
-          }};
+    [](PassBuilder &PB) {
+      PB.registerPipelineParsingCallback(
+        [](StringRef Name, FunctionPassManager &FPM,
+          ArrayRef<PassBuilder::PipelineElement>) {
+		          // adding pass by the value of flag for algebraic identity opt
+              if (Name == "alg-id") {
+                FPM.addPass(AlgebraicIdentity());
+                return true;
+              }
+              // adding pass by the value of flag for strenght reduction opt
+              if (Name == "str-rd") {
+                FPM.addPass(StrenghtReduction());
+                return true;
+              }
+              // adding pass by the value of flag for multi instruction opt
+              if (Name == "mul-ins-opt") {
+                FPM.addPass(MultiInstructionOptimization());
+                return true;
+              }
+              // flag for doing all the passes
+              if ((Name == "A") or (Name == "all")) {
+		            FPM.addPass(AlgebraicIdentity());
+	              FPM.addPass(StrenghtReduction());
+		            FPM.addPass(MultiInstructionOptimization());
+                return true;
+		          }
+              return false;
+          });
+    }};
 }
 
 // This is the core interface for pass plugins. It guarantees that 'opt' will
