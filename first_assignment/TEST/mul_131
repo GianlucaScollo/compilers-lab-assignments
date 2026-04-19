@@ -1,0 +1,7 @@
+define dso_local i128 @mul_131(i128 %x) {
+entry:
+  ; Questa è l'istruzione esatta che il tuo pass cercherà e trasformerà!
+  ; (nsw significa "No Signed Wrap", LLVM sa che non dovrebbe andare in overflow)
+  %mul = mul nsw i128 131, %x
+  ret i128 %mul
+}
