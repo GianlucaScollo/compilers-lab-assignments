@@ -437,10 +437,23 @@ void computeNAF(const APInt &x, APInt &np, APInt &nm) {
 
 // MultiInstructionOptimization implementation
 struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization> {
+	
+	// Assicura che l'istruzione passata sia una somma o una sottrazione 
+	*BinaryOperator toBinOp(Instruction &i){
+		if(auto binOp = dyn_cast<BinaryOperation>(i) != nullptr)
+			if(binOp->getOpcode() == Instruction::Add || bin->getOpcode() == Instruction::Sub)
+				return binOp;
+		return nullptr;
+	}
+
   // Main entry point, takes IR unit to run the pass on (&F) and the
   // corresponding pass manager (to be queried if need be)
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-
+	  for(&BB : F){
+		  for(&I : BB){
+			
+		  }
+	  }
     return PreservedAnalyses::all();
   }
 
