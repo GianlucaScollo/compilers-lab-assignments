@@ -437,21 +437,44 @@ void computeNAF(const APInt &x, APInt &np, APInt &nm) {
 
 // MultiInstructionOptimization implementation
 struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization> {
-	
-	// Assicura che l'istruzione passata sia una somma o una sottrazione 
-	*BinaryOperator toBinOp(Instruction &i){
-		if(auto binOp = dyn_cast<BinaryOperation>(i) != nullptr)
-			if(binOp->getOpcode() == Instruction::Add || bin->getOpcode() == Instruction::Sub)
-				return binOp;
-		return nullptr;
-	}
-
   // Main entry point, takes IR unit to run the pass on (&F) and the
   // corresponding pass manager (to be queried if need be)
+
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-	  for(&BB : F){
-		  for(&I : BB){
-			
+    bool changed = false;
+	  for (auto &BB : F){
+		  for (auto &I : BB){
+			auto binOp = dyn_cast<BinaryOperator>(&I);
+			if (binOp == nullptr)
+				continue;
+
+			switch (binOp->getOpcode()){
+				case Instruction::Add:
+                    auto constOp = dyn_cast<ConstantInt>(binOp->getOperand(1));
+                    if (constOp == nullptr)
+                        continue;
+                    for (auto const &U : I.users()){
+                        auto userBinOp = dyn_cast<BinaryOperator>(&U);
+			            if (userBinOp == nullptr)
+				            continue;
+                        if (userBinOp->getOpcode() != Instruction::Sub)
+                            continue;
+                        auto userConstOp = dyn_cast<ConstantInt>(U->getOperand(1));
+                        if (userConstOp == nullptr)
+                            continue;
+                        if (userConstOp->getZExtValue() == constOp->getZExtValue()){
+                            changed = true;
+                            Instruction *instr = dyn_cast<Instruction>(U);
+                            U->replaceAllUsesWith(I.getOperand(0));
+                            instr->eraseFromParent();
+                        }
+                    }
+					break;
+				case Instruction::Sub:
+					break;
+				default:
+					continue;
+			}	
 		  }
 	  }
     return PreservedAnalyses::all();
