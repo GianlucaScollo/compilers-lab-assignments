@@ -443,65 +443,103 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
     /** Riconosce gli operandi costanti e non in operazioni in cui vale la proprietà commutativa.
      *  Restituisce un std::pair in cui first è un'istruzione e second è il valore costante.
      * */
-    std::pair<Value*, ConstantInt*> parseAddMul(BinaryOperator* add){
+    std::pair<Value*, ConstantInt*> parseCommutative(const BinaryOperator* op){
 
         std::pair<Value*, ConstantInt*> operands = {nullptr, nullptr};
-        auto lhsConst = dyn_cast<ConstantInt>(add->getOperand(0));
-        auto rhsConst = dyn_cast<ConstantInt>(add->getOperand(1));
+        auto lhsConst = dyn_cast<ConstantInt>(op->getOperand(0));
+        auto rhsConst = dyn_cast<ConstantInt>(op->getOperand(1));
 
         // Se nessuno degli operandi è costante o lo sono entrambi, l'addizione non è insteressata dall'ottimizzazione
         if (lhsConst == nullptr && rhsConst != nullptr)
-            operands = {add->getOperand(0), rhsConst};
+            operands = {op->getOperand(0), rhsConst};
         else if (lhsConst != nullptr && rhsConst == nullptr)
-            operands = {add->getOperand(1), lhsConst};
+            operands = {op->getOperand(1), lhsConst};
         return operands;
     }
 
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-    bool changed = false;
-	  for (auto &BB : F){
-		  for (auto &I : BB){
-			auto binOp = dyn_cast<BinaryOperator>(&I);
-			if (binOp == nullptr)
-				continue;
+    // Restituisce l'operazione binaria opposta a quella passata per argomento
+    Instruction::BinaryOps getOppositeOpcode(Instruction::BinaryOps opcode){
+        switch (opcode){
+            case Instruction::Add:
+                return Instruction::Sub;
+            case Instruction::Sub:
+                return Instruction::Add;
+            case Instruction::Mul:
+                return Instruction::UDiv;
+            case Instruction::UDiv:
+                return Instruction::Mul;
+        }
+    }
 
-			switch (binOp->getOpcode()){
-				case Instruction::Add:
-                    auto addOperands = parseAddMul(binOp);
-                    if (addOperands.first == nullptr || addOperands.second == nullptr)
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
+        for (auto &BB : F){
+            for (auto &I : BB){
+                auto binOp = dyn_cast<BinaryOperator>(&I);
+                std::pair<Value*, ConstantInt*> commutativeOperands = {nullptr, nullptr};
+                ConstantInt* firstConstOperand = nullptr;
+                if (binOp == nullptr)
+                    continue;
+
+                // Se l'operatore gode della proprietà commutativa, identifica l'operando costante e l'operando istruzione indipendentemente dall'ordine in cui si presentano nell'operazione
+                if (binOp->getOpcode() == Instruction::Add || binOp->getOpcode() == Instruction::Mul){
+                    commutativeOperands = parseCommutative(binOp);
+                    if (commutativeOperands.first == nullptr || commutativeOperands.second == nullptr)
                         continue;
-                    for (auto const &U : I.users()){
-                        auto userBinOp = dyn_cast<BinaryOperator>(&U);
-			            if (userBinOp == nullptr)
-				            continue;
-                        if (userBinOp->getOpcode() != Instruction::Sub)
+                    // ora anche firstConstOperand punta al valore costante della prima istruzione 
+                    firstConstOperand = commutativeOperands.second;
+                }
+
+                // Se la proprietà commutativa non si applica all'operatore si considerano solo le istruzioni in cui il valore costante è a destra
+                else if (binOp->getOpcode() == Instruction::Sub || binOp->getOpcode() == Instruction::UDiv){
+                    firstConstOperand = dyn_cast<ConstantInt>(binOp->getOperand(1));
+                    if (firstConstOperand == nullptr)
+                        continue;
+                }
+
+                // Itera tutti gli user dell'istruzione
+                for (auto const &U : I.users()){
+                    const BinaryOperator* userBinOp = dyn_cast<BinaryOperator>(&U);
+                    std::pair<Value*, ConstantInt*> userCommutativeOperands = {nullptr, nullptr};
+                    ConstantInt* userConstOperand = nullptr;
+
+                    if (userBinOp == nullptr)
+                        continue;
+
+                    if (userBinOp->getOpcode() != getOppositeOpcode(userBinOp->getOpcode()))
+                        continue;
+                    
+                    // Se user è commutativa trova il valore costante in qualunque posizione sia
+                    if (userBinOp->getOpcode() == Instruction::Add || userBinOp->getOpcode() == Instruction::Mul){
+                        userCommutativeOperands = parseCommutative(userBinOp);
+                        if (userCommutativeOperands.first == nullptr || userCommutativeOperands.second == nullptr)
                             continue;
-                        auto userConstOperand = dyn_cast<ConstantInt>(U->getOperand(1));
+                        // ora anche userConstOperand punta al valore costante dell'istruzione user
+                        userConstOperand = userCommutativeOperands.second;
+                    } 
+                    else if (userBinOp->getOpcode() == Instruction::Sub || userBinOp->getOpcode() == Instruction::UDiv){
+                        userConstOperand = dyn_cast<ConstantInt>(userBinOp->getOperand(1));
                         if (userConstOperand == nullptr)
                             continue;
-                        if (userConstOperand->getZExtValue() == addOperands.second->getZExtValue()){
-                            changed = true;
-                            Instruction *instr = dyn_cast<Instruction>(U);
-                            instr->replaceAllUsesWith(addOperands.first);
-                            instr->eraseFromParent();
-                        }
                     }
-					break;
-				case Instruction::Sub:
-                    
-					break;
-				default:
-					continue;
-			}	
-		  }
-	  }
-    return PreservedAnalyses::all();
-  }
+
+                    Instruction *instr = dyn_cast<Instruction>(U);
+                    if (userConstOperand->getZExtValue() == firstConstOperand->getZExtValue()){
+                        if (userBinOp->getOpcode() == Instruction::Add || userBinOp->getOpcode() == Instruction::Mul)
+                            instr->replaceAllUsesWith(commutativeOperands.first);
+                        else if (userBinOp->getOpcode() == Instruction::Sub || userBinOp->getOpcode() == Instruction::UDiv)
+                            instr->replaceAllUsesWith(binOp->getOperand(0));
+                        instr->eraseFromParent();
+                    }
+                }
+            }
+        }
+        return PreservedAnalyses::all();
+    }
 
   // Without isRequired returning true, this pass will be skipped for functions
   // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
   // all functions with optnone.
-  static bool isRequired() { return true; }
+    static bool isRequired() { return true; }
 };
 
 } // namespace
