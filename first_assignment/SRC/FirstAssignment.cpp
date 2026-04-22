@@ -440,7 +440,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
   // Main entry point, takes IR unit to run the pass on (&F) and the
   // corresponding pass manager (to be queried if need be)
 
-    /** Riconosce gli operandi costanti e non in operazioni in cui vale la proprietà commutativa.
+    /** Riconosce gli operandi in operazioni in cui vale la proprietà commutativa.
      *  Restituisce un std::pair in cui first è un'istruzione e second è il valore costante.
      * */
     std::pair<Value*, ConstantInt*> parseCommutative(const BinaryOperator* op){
@@ -473,6 +473,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
     }
 
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
+        bool changed = false;
         for (auto &BB : F){
             for (auto &I : BB){
                 auto binOp = dyn_cast<BinaryOperator>(&I);
@@ -507,7 +508,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                     if (userBinOp == nullptr)
                         continue;
 
-                    if (userBinOp->getOpcode() != getOppositeOpcode(userBinOp->getOpcode()))
+                    if (userBinOp->getOpcode() != getOppositeOpcode(binOp->getOpcode()))
                         continue;
                     
                     // Se user è commutativa trova il valore costante in qualunque posizione sia
@@ -525,15 +526,19 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                     }
 
                     if (userConstOperand->getZExtValue() == firstConstOperand->getZExtValue()){
-                        if (userBinOp->getOpcode() == Instruction::Add || userBinOp->getOpcode() == Instruction::Mul)
+                        if (binOp->getOpcode() == Instruction::Add || binOp->getOpcode() == Instruction::Mul){
                             user->replaceAllUsesWith(commutativeOperands.first);
-                        else if (userBinOp->getOpcode() == Instruction::Sub || userBinOp->getOpcode() == Instruction::UDiv)
+                            changed = true;
+                        }
+                        else if (binOp->getOpcode() == Instruction::Sub || binOp->getOpcode() == Instruction::UDiv)
                             user->replaceAllUsesWith(binOp->getOperand(0));
-                        user->eraseFromParent();
+                        //user->eraseFromParent();
                     }
                 }
             }
         }
+        if (changed)
+            return PreservedAnalyses::none();
         return PreservedAnalyses::all();
     }
 
