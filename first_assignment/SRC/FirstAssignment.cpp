@@ -469,6 +469,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
             case Instruction::UDiv:
                 return Instruction::Mul;
         }
+        return opcode;
     }
 
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
@@ -498,7 +499,8 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
 
                 // Itera tutti gli user dell'istruzione
                 for (auto const &U : I.users()){
-                    const BinaryOperator* userBinOp = dyn_cast<BinaryOperator>(&U);
+                    Instruction *user = dyn_cast<Instruction>(U);
+                    const BinaryOperator* userBinOp = dyn_cast<BinaryOperator>(user);
                     std::pair<Value*, ConstantInt*> userCommutativeOperands = {nullptr, nullptr};
                     ConstantInt* userConstOperand = nullptr;
 
@@ -522,13 +524,12 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                             continue;
                     }
 
-                    Instruction *instr = dyn_cast<Instruction>(U);
                     if (userConstOperand->getZExtValue() == firstConstOperand->getZExtValue()){
                         if (userBinOp->getOpcode() == Instruction::Add || userBinOp->getOpcode() == Instruction::Mul)
-                            instr->replaceAllUsesWith(commutativeOperands.first);
+                            user->replaceAllUsesWith(commutativeOperands.first);
                         else if (userBinOp->getOpcode() == Instruction::Sub || userBinOp->getOpcode() == Instruction::UDiv)
-                            instr->replaceAllUsesWith(binOp->getOperand(0));
-                        instr->eraseFromParent();
+                            user->replaceAllUsesWith(binOp->getOperand(0));
+                        user->eraseFromParent();
                     }
                 }
             }
