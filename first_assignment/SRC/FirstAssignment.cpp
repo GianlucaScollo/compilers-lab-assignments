@@ -440,6 +440,23 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
   // Main entry point, takes IR unit to run the pass on (&F) and the
   // corresponding pass manager (to be queried if need be)
 
+    /** Riconosce gli operandi costanti e non in operazioni in cui vale la proprietà commutativa.
+     *  Restituisce un std::pair in cui first è un'istruzione e second è il valore costante.
+     * */
+    std::pair<Value*, ConstantInt*> parseAddMul(BinaryOperator* add){
+
+        std::pair<Value*, ConstantInt*> operands = {nullptr, nullptr};
+        auto lhsConst = dyn_cast<ConstantInt>(add->getOperand(0));
+        auto rhsConst = dyn_cast<ConstantInt>(add->getOperand(1));
+
+        // Se nessuno degli operandi è costante o lo sono entrambi, l'addizione non è insteressata dall'ottimizzazione
+        if (lhsConst == nullptr && rhsConst != nullptr)
+            operands = {add->getOperand(0), rhsConst};
+        else if (lhsConst != nullptr && rhsConst == nullptr)
+            operands = {add->getOperand(1), lhsConst};
+        return operands;
+    }
+
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
     bool changed = false;
 	  for (auto &BB : F){
@@ -450,8 +467,8 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
 
 			switch (binOp->getOpcode()){
 				case Instruction::Add:
-                    auto constOp = dyn_cast<ConstantInt>(binOp->getOperand(1));
-                    if (constOp == nullptr)
+                    auto addOperands = parseAddMul(binOp);
+                    if (addOperands.first == nullptr || addOperands.second == nullptr)
                         continue;
                     for (auto const &U : I.users()){
                         auto userBinOp = dyn_cast<BinaryOperator>(&U);
@@ -459,18 +476,19 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
 				            continue;
                         if (userBinOp->getOpcode() != Instruction::Sub)
                             continue;
-                        auto userConstOp = dyn_cast<ConstantInt>(U->getOperand(1));
-                        if (userConstOp == nullptr)
+                        auto userConstOperand = dyn_cast<ConstantInt>(U->getOperand(1));
+                        if (userConstOperand == nullptr)
                             continue;
-                        if (userConstOp->getZExtValue() == constOp->getZExtValue()){
+                        if (userConstOperand->getZExtValue() == addOperands.second->getZExtValue()){
                             changed = true;
                             Instruction *instr = dyn_cast<Instruction>(U);
-                            U->replaceAllUsesWith(I.getOperand(0));
+                            instr->replaceAllUsesWith(addOperands.first);
                             instr->eraseFromParent();
                         }
                     }
 					break;
 				case Instruction::Sub:
+                    
 					break;
 				default:
 					continue;
