@@ -457,7 +457,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
         return operands;
     }
 
-    // Restituisce l'operazione binaria opposta a quella passata per argomento
+    // Restituisce l'operazione opposta a quella passata per argomento
     Instruction::BinaryOps getOppositeOpcode(Instruction::BinaryOps opcode){
         switch (opcode){
             case Instruction::Add:
@@ -467,6 +467,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
             case Instruction::Mul:
                 return Instruction::UDiv;
             case Instruction::UDiv:
+            case Instruction::SDiv:
                 return Instruction::Mul;
         }
         return opcode;
@@ -515,12 +516,14 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                     if (userBinOp == nullptr)
                         continue;
 
+                    // Se l'operatore dello user non è "opposto" all'operatore dell'istruzione che si sta analizzando l'istruzione user non è interessata dalla ottimizzazione
                     if (userBinOp->getOpcode() != getOppositeOpcode(binOp->getOpcode()))
                         continue;
                     
-                    // Se user è commutativa trova il valore costante in qualunque posizione sia
+                    // Se user è commutativa ordina gli operandi nella forma {istruzione, costante} passandola a parseCommutative
                     if (userBinOp->getOpcode() == Instruction::Add || userBinOp->getOpcode() == Instruction::Mul){
                         userCommutativeOperands = parseCommutative(userBinOp);
+                        // Se dopo il casting avvenuto in parseCommutative un operando è nullo l'istruzione user non è interessata dall'ottimizzazione
                         if (userCommutativeOperands.first == nullptr || userCommutativeOperands.second == nullptr)
                             continue;
                         // ora anche userConstOperand punta al valore costante dell'istruzione user
@@ -529,10 +532,12 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                     // Se user non è commutativa cerca il valore costante solo a destra
                     else if (userBinOp->getOpcode() == Instruction::Sub || userBinOp->getOpcode() == Instruction::UDiv){
                         userConstOperand = dyn_cast<ConstantInt>(userBinOp->getOperand(1));
+                        // Se il casting a ConstantInt dell'operando destro non ha successo significa che l'istruzione di cui fa parte non è interessata dall'ottimizzazione
                         if (userConstOperand == nullptr)
                             continue;
                     }
-
+                    
+                    // Se i valori costanti riconosciuti nelle operazioni "opposte" sono uguali tra loro si applica l'ottimizzazione
                     if (userConstOperand->getZExtValue() == firstConstOperand->getZExtValue()){
                         if (binOp->getOpcode() == Instruction::Add || binOp->getOpcode() == Instruction::Mul){
                             user->replaceAllUsesWith(commutativeOperands.first);
@@ -547,8 +552,11 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                 }
             }
         }
-        if (changed)
-            return PreservedAnalyses::none();
+        if(changed) {
+            PreservedAnalyses PA;
+            PA.preserveSet<CFGAnalyses>();
+            return PA;
+        }
         return PreservedAnalyses::all();
     }
 
