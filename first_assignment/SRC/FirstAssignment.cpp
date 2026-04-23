@@ -46,12 +46,12 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
       // itero le istruzioni del BB
       for (auto IterINST = B.begin(); IterINST != B.end(); ) {
 
-		Instruction &I = *IterINSTR++;
+		Instruction &I = *IterINST++;
 
         int flag = 0;
         Value *operandToKeep = nullptr;
 
-        // controllo se l'operatore dell'instruzione sia una addizione (13)
+        // controllo se l'operatore dell'istruzione sia una addizione (13)
         if (I.getOpcode() == 13) {
           auto op1 = I.getOperand(0);
           auto op2 = I.getOperand(1);
@@ -73,7 +73,7 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
           }
         }
 
-        // controllo se l'operatore dell'instruzione sia una moltiplicazione (17)
+        // controllo se l'operatore dell'istruzione sia una moltiplicazione (17)
         if (I.getOpcode() == 17) {
           auto op1 = I.getOperand(0);
           auto op2 = I.getOperand(1);
