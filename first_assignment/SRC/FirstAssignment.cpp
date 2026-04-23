@@ -36,7 +36,7 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
   // corresponding pass manager (to be queried if need be)
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
 
-	bool Changed = false;
+	  bool Changed = false;
 	
     // itero i BBs della funzione
     for (auto IterBB = F.begin(); IterBB != F.end(); ++IterBB) {
@@ -46,7 +46,7 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
       // itero le istruzioni del BB
       for (auto IterINST = B.begin(); IterINST != B.end(); ) {
 
-		Instruction &I = *IterINST++;
+		    Instruction &I = *IterINST++;
 
         int flag = 0;
         Value *operandToKeep = nullptr;
@@ -96,18 +96,18 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
         }
 
         if (flag && operandToKeep) {
-		  Changed=true;
+		      Changed=true;
           // rimpiazzo tutti gli usi dell'istruzione con l'operando corretto (operandToKeep)
           I.replaceAllUsesWith(operandToKeep);
           I.eraseFromParent();
         }
       } // <-- Chiude for (auto IterINSTR = B.begin(); ...)
     } // <-- Chiude for (auto IterBB = F.begin(); ...) 
-	if(Changed) {
-		outs() << "La funzione " << F.getName() << " è stata modificata.\n";
-		PreservedAnalyses PA;
-		PA.preserveSet<CFGAnalyses>();
-		return PA;
+    if(Changed) {
+      outs() << "La funzione " << F.getName() << " è stata modificata.\n";
+      PreservedAnalyses PA;
+      PA.preserveSet<CFGAnalyses>();
+      return PA;
     }
     return PreservedAnalyses::all();
   }
