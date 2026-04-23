@@ -449,7 +449,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
         auto lhsConst = dyn_cast<ConstantInt>(op->getOperand(0));
         auto rhsConst = dyn_cast<ConstantInt>(op->getOperand(1));
 
-        // Se nessuno degli operandi è costante o lo sono entrambi, l'addizione non è insteressata dall'ottimizzazione
+        // Se nessuno degli operandi è costante o lo sono entrambi, l'addizione non è interessata dall'ottimizzazione
         if (lhsConst == nullptr && rhsConst != nullptr)
             operands = {op->getOperand(0), rhsConst};
         else if (lhsConst != nullptr && rhsConst == nullptr)
@@ -474,8 +474,10 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
 
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
         bool changed = false;
-        for (auto &BB : F){
-            for (auto &I : BB){
+        for (auto BBiter = F.begin(); BBiter != F.end(); ++BBiter){
+            BasicBlock &BB = *BBiter;            
+            for (auto Iiter = BB.begin(); Iiter != BB.end(); ++Iiter){
+                Instruction &I = *Iiter;
                 auto binOp = dyn_cast<BinaryOperator>(&I);
                 std::pair<Value*, ConstantInt*> commutativeOperands = {nullptr, nullptr};
                 ConstantInt* firstConstOperand = nullptr;
@@ -499,9 +501,14 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                 }
 
                 // Itera tutti gli user dell'istruzione
-                for (auto const &U : I.users()){
-                    Instruction *user = dyn_cast<Instruction>(U);
+                for (auto Uiter = I.user_begin(); Uiter != I.user_end();){
+                    //Instruction *user = dyn_cast<Instruction>(*Uiter);
+                    User* user = *Uiter;
+                    Uiter++;
+                    if (user == nullptr)
+                        continue;
                     const BinaryOperator* userBinOp = dyn_cast<BinaryOperator>(user);
+
                     std::pair<Value*, ConstantInt*> userCommutativeOperands = {nullptr, nullptr};
                     ConstantInt* userConstOperand = nullptr;
 
@@ -519,6 +526,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                         // ora anche userConstOperand punta al valore costante dell'istruzione user
                         userConstOperand = userCommutativeOperands.second;
                     } 
+                    // Se user non è commutativa cerca il valore costante solo a destra
                     else if (userBinOp->getOpcode() == Instruction::Sub || userBinOp->getOpcode() == Instruction::UDiv){
                         userConstOperand = dyn_cast<ConstantInt>(userBinOp->getOperand(1));
                         if (userConstOperand == nullptr)
@@ -528,11 +536,13 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
                     if (userConstOperand->getZExtValue() == firstConstOperand->getZExtValue()){
                         if (binOp->getOpcode() == Instruction::Add || binOp->getOpcode() == Instruction::Mul){
                             user->replaceAllUsesWith(commutativeOperands.first);
-                            changed = true;
                         }
                         else if (binOp->getOpcode() == Instruction::Sub || binOp->getOpcode() == Instruction::UDiv)
                             user->replaceAllUsesWith(binOp->getOperand(0));
-                        //user->eraseFromParent();
+                        changed = true;
+                        Instruction *userInst = dyn_cast<Instruction>(user);
+                        userInst->dropAllReferences();
+                        userInst->eraseFromParent();
                     }
                 }
             }
