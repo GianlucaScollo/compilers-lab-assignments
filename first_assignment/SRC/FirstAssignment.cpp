@@ -36,28 +36,27 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
   // corresponding pass manager (to be queried if need be)
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
 
-    // iterating the BBs of the function
+	bool Changed = false;
+	
+    // itero i BBs della funzione
     for (auto IterBB = F.begin(); IterBB != F.end(); ++IterBB) {
 
     	BasicBlock &B = *IterBB;
 
-      // iterating the instructions of the BB
+      // itero le istruzioni del BB
       for (auto IterINST = B.begin(); IterINST != B.end(); ) {
 
-        // now we have a single instruction of a BB
         Instruction &I = *IterINST;
-
-        // then we can control if we can optimize it
 
         int flag = 0;
         Value *operandToKeep = nullptr;
 
-        // check if the operation of the instruction is an add (13)
+        // controllo se l'operatore dell'instruzione sia una addizione (13)
         if (I.getOpcode() == 13) {
           auto op1 = I.getOperand(0);
           auto op2 = I.getOperand(1);
 
-          // check if op1 is 0
+          // controllo se il primo operando (op1) è uguale a 0
           if (ConstantInt *C = dyn_cast<ConstantInt>(op1)) {
             if (C->getValue() == 0) {
               flag = 1;
@@ -65,7 +64,7 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
             }
           }
 
-          // check if op2 is 0
+          // controllo se il seconndo operando (op2) è uguale a 0
           if (ConstantInt *C = dyn_cast<ConstantInt>(op2)) {
             if (C->getValue() == 0) {
               flag = 1;
@@ -74,12 +73,12 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
           }
         }
 
-        // check if the operation of the instruction is an mul (17)
+        // controllo se l'operatore dell'instruzione sia una moltiplicazione (17)
         if (I.getOpcode() == 17) {
           auto op1 = I.getOperand(0);
           auto op2 = I.getOperand(1);
 
-          // check if op1 is 1
+          // controllo se il primo operando (op1) è uguale a 1
           if (ConstantInt *C = dyn_cast<ConstantInt>(op1)) {
             if (C->getValue() == 1) {
               flag = 1;
@@ -87,7 +86,7 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
             }
           }
 
-          // check if op2 is 1
+          // controllo se il seconndo operando (op2) è uguale a 1
           if (ConstantInt *C = dyn_cast<ConstantInt>(op2)) {
             if (C->getValue() == 1) {
               flag = 1;
@@ -97,19 +96,25 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
         }
 
         if (flag && operandToKeep) {
-          // now i will replace all uses of the instruction with the right operand
+		  Changed=true;
+          // rimpiazzo tutti gli usi dell'istruzione con l'operando corretto (operandToKeep)
           I.replaceAllUsesWith(operandToKeep);
-          // before the deletion of the instruction i will increment the iterator because i want a valid pointer for the next instruction
+          // prima di eliminare l'istruzione bisogna incrementare l'iteratore perchè non voglio avere problemi di segmentation fault
           ++IterINST;
-          // now i can delete the instruction
+          // adesso posso rimuovere l'istruzione
           I.eraseFromParent();
         }
         else {
           ++IterINST;
         }
-      }
+      } // <-- Chiude for (auto IterINSTR = B.begin(); ...)
+    } // <-- Chiude for (auto IterBB = F.begin(); ...) 
+	if(Changed) {
+		outs() << "La funzione " << F.getName() << " è stata modificata.\n";
+		PreservedAnalyses PA;
+		PA.preserveSet<CFGAnalyses>();
+		return PA;
     }
-
     return PreservedAnalyses::all();
   }
 
