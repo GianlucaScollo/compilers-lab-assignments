@@ -40,13 +40,13 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
 	
     // itero i BBs della funzione
     for (auto IterBB = F.begin(); IterBB != F.end(); ++IterBB) {
-
-    	BasicBlock &B = *IterBB;
+	  
+      BasicBlock &B = *IterBB;
 
       // itero le istruzioni del BB
       for (auto IterINST = B.begin(); IterINST != B.end(); ) {
 
-        Instruction &I = *IterINST;
+		Instruction &I = *IterINSTR++;
 
         int flag = 0;
         Value *operandToKeep = nullptr;
@@ -64,7 +64,7 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
             }
           }
 
-          // controllo se il seconndo operando (op2) è uguale a 0
+          // controllo se il secondo operando (op2) è uguale a 0
           if (ConstantInt *C = dyn_cast<ConstantInt>(op2)) {
             if (C->getValue() == 0) {
               flag = 1;
@@ -86,7 +86,7 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
             }
           }
 
-          // controllo se il seconndo operando (op2) è uguale a 1
+          // controllo se il secondo operando (op2) è uguale a 1
           if (ConstantInt *C = dyn_cast<ConstantInt>(op2)) {
             if (C->getValue() == 1) {
               flag = 1;
@@ -99,13 +99,7 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
 		  Changed=true;
           // rimpiazzo tutti gli usi dell'istruzione con l'operando corretto (operandToKeep)
           I.replaceAllUsesWith(operandToKeep);
-          // prima di eliminare l'istruzione bisogna incrementare l'iteratore perchè non voglio avere problemi di segmentation fault
-          ++IterINST;
-          // adesso posso rimuovere l'istruzione
           I.eraseFromParent();
-        }
-        else {
-          ++IterINST;
         }
       } // <-- Chiude for (auto IterINSTR = B.begin(); ...)
     } // <-- Chiude for (auto IterBB = F.begin(); ...) 
