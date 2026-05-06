@@ -592,13 +592,6 @@ llvm::PassPluginLibraryInfo getFirstAssignmentPluginInfo() {
                 FPM.addPass(MultiInstructionOptimization());
                 return true;
               }
-              // flag for doing all the passes
-              if ((Name == "A") or (Name == "all")) {
-		            FPM.addPass(AlgebraicIdentity());
-	              FPM.addPass(StrengthReductionPass());
-		            FPM.addPass(MultiInstructionOptimization());
-                return true;
-		          }
               return false;
           });
     }};
