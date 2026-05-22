@@ -1,25 +1,23 @@
 
 #include "llvm/Passes/PassPlugin.h"
-#include "llvm/Support/raw_ostream.h" // Per outs()
+#include "llvm/Support/raw_ostream.h"   // Per outs()
 #include "llvm/Passes/PassBuilder.h"
 
-// --- Librerie per la logica matematica e IR del tuo passo NAF ---
-#include "llvm/IR/PassManager.h"      // Per PassInfoMixin e PreservedAnalyses
-#include "llvm/IR/Function.h"         // Per Function
-#include "llvm/IR/BasicBlock.h"       // Per BasicBlock
-#include "llvm/IR/Instruction.h"      // Per Instruction
-#include "llvm/IR/Instructions.h"     // Per BinaryOperator
-#include "llvm/IR/Constants.h"        // Per ConstantInt
-#include "llvm/IR/IRBuilder.h"        // Per IRBuilder (shift, add, sub)
-#include "llvm/IR/Type.h"             // Per gestire i bit (i32, i64)
-#include "llvm/Support/Casting.h"     // Per dyn_cast<>
-#include "llvm/Support/MathExtras.h"  // Per popcount e countr_zero
-#include "llvm/ADT/APInt.h"           // Per i numeri interi grandi
+#include "llvm/IR/PassManager.h"        // Per PassInfoMixin e PreservedAnalyses
+#include "llvm/IR/Function.h"           // Per Function
+#include "llvm/IR/BasicBlock.h"         // Per BasicBlock
+#include "llvm/IR/Instruction.h"        // Per Instruction
+#include "llvm/IR/Instructions.h"       // Per BinaryOperator
+#include "llvm/IR/Constants.h"          // Per ConstantInt
+#include "llvm/IR/IRBuilder.h"          // Per IRBuilder (shift, add, sub)
+#include "llvm/IR/Type.h"               // Per gestire i bit (i32, i64)
+#include "llvm/Support/Casting.h"       // Per dyn_cast<>
+#include "llvm/Support/MathExtras.h"    // Per popcount e countr_zero
+#include "llvm/ADT/APInt.h"             // Per i numeri interi grandi
 #include "llvm/Support/DivisionByConstantInfo.h"
 
-// --- Librerie standard C++ ---
-#include <algorithm>                  // Per std::swap
-#include <cstdint>                    // Per uint64_t
+#include <algorithm>                    // Per std::swap
+#include <cstdint>                      // Per uint64_t
 
 
 using namespace llvm;
@@ -117,6 +115,8 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
   // all functions with optnone.
   static bool isRequired() { return true; }
 };
+
+
 
 // StrenghtReduction implementation
 void computeNAF(const APInt &x, APInt &np, APInt &nm) {
@@ -434,6 +434,8 @@ void computeNAF(const APInt &x, APInt &np, APInt &nm) {
     static bool isRequired() { return true; }
     };
 
+
+
 // MultiInstructionOptimization implementation
 struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization> {
   // Main entry point, takes IR unit to run the pass on (&F) and the
@@ -562,7 +564,7 @@ struct MultiInstructionOptimization: PassInfoMixin<MultiInstructionOptimization>
   // Without isRequired returning true, this pass will be skipped for functions
   // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
   // all functions with optnone.
-    static bool isRequired() { return true; }
+  static bool isRequired() { return true; }
 };
 
 } // namespace
@@ -577,7 +579,7 @@ llvm::PassPluginLibraryInfo getFirstAssignmentPluginInfo() {
       PB.registerPipelineParsingCallback(
         [](StringRef Name, FunctionPassManager &FPM,
           ArrayRef<PassBuilder::PipelineElement>) {
-		          // adding pass by the value of flag for algebraic identity opt
+              // adding pass by the value of flag for algebraic identity opt
               if (Name == "alg-id") {
                 FPM.addPass(AlgebraicIdentity());
                 return true;
