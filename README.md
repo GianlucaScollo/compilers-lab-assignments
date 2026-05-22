@@ -11,6 +11,13 @@ root/
 │   │   └── CMakeLists.txt
 │   └── TEST/                       # Directory with test files
 │       └── ...
+├── second_assignment/               # Second assignment
+├── third_assignment/               # Third assignment
+│   ├── SRC/                        # Directory with src files
+│   │   ├── ThirdAssignment.cpp
+│   │   └── CMakeLists.txt
+│   └── TEST/                       # Directory with test files
+│       └── ...
 ├── .gitignore                      # gitignore file
 └── README.md                       # You are here now!
 ```
