@@ -83,8 +83,13 @@ namespace {
     // Main entry point, takes IR unit to run the pass on (&F) and the
     // corresponding pass manager (to be queried if need be)
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
+      LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
+      DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
+      
       // 1. Chiediamo a LLVM tutti i loop (Lui ce li dà in Pre-Order, dall'esterno all'interno)
       auto Loops = LI.getLoopsInPreorder();
+
+      bool changed_Loop = false;
 
       // 2. Li iteriamo AL CONTRARIO (Reverse Iterator)
       // In questo modo partiamo dai loop più profondi/innestati e risaliamo verso l'esterno.
@@ -95,8 +100,7 @@ namespace {
           if (!Preheader) continue;
           
           Instruction *PreheaderTerminator = Preheader->getTerminator();
-          bool changed_CFG = false;
-
+          
           bool changed = true;
           while (changed) {
               changed = false;
@@ -108,13 +112,13 @@ namespace {
                           errs() << "Sposto l'istruzione: " << I << "\n";
                           I.moveBefore(PreheaderTerminator);
                           changed = true;
-                          changed_CFG = true;
+                          changed_Loop = true;
                       }
                   }
               }
           }
       }
-      if (changed_CFG) {
+      if (changed_Loop) {
           outs() << "La funzione " << F.getName() << " è stata modificata.\n";
           PreservedAnalyses PA;
           PA.preserveSet<CFGAnalyses>();

@@ -5,7 +5,7 @@ project(third-assignmnet)
 # 1. LOAD LLVM CONFIGURATION
 #===============================================================================
 # Set this to a valid LLVM installation dir
-set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
+set(DLT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 
 # Add the location of LLVMConfig.cmake to CMake search paths (so that
 # find_package can locate it)
@@ -39,3 +39,4 @@ add_library(ThirdAssignment SHARED ThirdAssignment.cpp)
 # behaviour on Linux)
 target_link_libraries(ThirdAssignment
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
+  
