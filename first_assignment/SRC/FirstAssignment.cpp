@@ -30,90 +30,97 @@ namespace {
 
 // AlgebraicIdentity implementation
 struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
-  // Main entry point, takes IR unit to run the pass on (&F) and the
-  // corresponding pass manager (to be queried if need be)
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
+    // Main entry point, takes IR unit to run the pass on (&F) and the
+    // corresponding pass manager (to be queried if need be)
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
 
-	  bool Changed = false;
+	    bool Changed = false;
 	
-    // itero i BBs della funzione
-    for (auto IterBB = F.begin(); IterBB != F.end(); ++IterBB) {
+        // itero i BBs della funzione
+        for (auto IterBB = F.begin(); IterBB != F.end(); ++IterBB) {
 	  
-      BasicBlock &B = *IterBB;
+            BasicBlock &B = *IterBB;
 
-      // itero le istruzioni del BB
-      for (auto IterINST = B.begin(); IterINST != B.end(); ) {
+            // itero le istruzioni del BB
+            for (auto IterINST = B.begin(); IterINST != B.end(); ) {
 
-		    Instruction &I = *IterINST++;
+		        Instruction &I = *IterINST++;
 
-        int flag = 0;
-        Value *operandToKeep = nullptr;
+                auto *binOp = dyn_cast<BinaryOperator>(&I);
+                // Verifico che sia un BinaryOperator
+                if (!binOp) {
+                    continue;
+                }
+                
+                Type *Ty = binOp->getType();
+                // Verifico che il tipo sia intero (niente Float, niente Vettori)
+                if (!Ty->isIntegerTy()) {
+                    continue;
+                }
 
-        // controllo se l'operatore dell'istruzione sia una addizione (13)
-        if (I.getOpcode() == 13) {
-          auto op1 = I.getOperand(0);
-          auto op2 = I.getOperand(1);
+                Value *Op0 = binOp->getOperand(0);
+                Value *Op1 = binOp->getOperand(1);
+                ConstantInt *C0 = dyn_cast<ConstantInt>(Op0);
+                ConstantInt *C1 = dyn_cast<ConstantInt>(Op1);
 
-          // controllo se il primo operando (op1) è uguale a 0
-          if (ConstantInt *C = dyn_cast<ConstantInt>(op1)) {
-            if (C->getValue() == 0) {
-              flag = 1;
-              operandToKeep = op2;
-            }
-          }
+                Value *ReplaceWith = nullptr;
 
-          // controllo se il secondo operando (op2) è uguale a 0
-          if (ConstantInt *C = dyn_cast<ConstantInt>(op2)) {
-            if (C->getValue() == 0) {
-              flag = 1;
-              operandToKeep = op1;
-            }
-          }
+                // caso: x + 0 -> x oppure 0 + x -> x
+                if (binOp->getOpcode() == Instruction::Add) {
+                    // controllo il primo operando
+                    if (C0 && C0->isZero()) ReplaceWith = Op1;
+                    // controllo il secondo operando
+                    else if (C1 && C1->isZero()) ReplaceWith = Op0;
+                }
+
+                // caso: x - 0 -> x
+                else if (binOp->getOpcode() == Instruction::Sub) {
+                    // controllo solo il secondo operando
+                    if (C1 && C1->isZero()) ReplaceWith = Op0;
+                }
+
+                // caso: x * 0 -> 0 oppure 0 * x -> 0
+                // caso: x * 1 -> x oppure 1 * x -> x
+                else if (binOp->getOpcode() == Instruction::Mul) {
+                    // controllo se uno dei due operandi sia zero
+                    if ((C0 && C0->isZero()) || (C1 && C1->isZero())) {
+                        ReplaceWith = ConstantInt::get(Ty, 0);
+                    }
+                    else if (C0 && C0->isOne()) ReplaceWith = Op1;
+                    else if (C1 && C1->isOne()) ReplaceWith = Op0;
+                }
+
+                // caso: x / 1 -> x
+                else if (binOp->getOpcode() == Instruction::SDiv || binOp->getOpcode() == Instruction::UDiv) {
+                    // controllo solo il secondo operando
+                    if (C1 && C1->isOne()) ReplaceWith = Op0;
+                }
+
+                // caso: x << 0 -> x oppure x >> 0 -> x
+                else if (binOp->getOpcode() == Instruction::Shl || binOp->getOpcode() == Instruction::LShr || binOp->getOpcode() == Instruction::AShr) {
+                    // controllo solo il secondo operando
+                    if (C1 && C1->isZero()) ReplaceWith = Op0;
+                }
+                
+                if (ReplaceWith) {
+                    binOp->replaceAllUsesWith(ReplaceWith);
+                    binOp->eraseFromParent();
+                    Changed = true;
+                }
+            } // <-- Chiude for (auto IterINST = B.begin(); ...)
+        } // <-- Chiude for (auto IterBB = F.begin(); ...) 
+        if(Changed) {
+            outs() << "La funzione " << F.getName() << " e' stata modificata.\n";
+            PreservedAnalyses PA;
+            PA.preserveSet<CFGAnalyses>();
+            return PA;
         }
-
-        // controllo se l'operatore dell'istruzione sia una moltiplicazione (17)
-        if (I.getOpcode() == 17) {
-          auto op1 = I.getOperand(0);
-          auto op2 = I.getOperand(1);
-
-          // controllo se il primo operando (op1) è uguale a 1
-          if (ConstantInt *C = dyn_cast<ConstantInt>(op1)) {
-            if (C->getValue() == 1) {
-              flag = 1;
-              operandToKeep = op2;
-            }
-          }
-
-          // controllo se il secondo operando (op2) è uguale a 1
-          if (ConstantInt *C = dyn_cast<ConstantInt>(op2)) {
-            if (C->getValue() == 1) {
-              flag = 1;
-              operandToKeep = op1;
-            }
-          }
-        }
-
-        if (flag && operandToKeep) {
-		      Changed=true;
-          // rimpiazzo tutti gli usi dell'istruzione con l'operando corretto (operandToKeep)
-          I.replaceAllUsesWith(operandToKeep);
-          I.eraseFromParent();
-        }
-      } // <-- Chiude for (auto IterINSTR = B.begin(); ...)
-    } // <-- Chiude for (auto IterBB = F.begin(); ...) 
-    if(Changed) {
-      outs() << "La funzione " << F.getName() << " è stata modificata.\n";
-      PreservedAnalyses PA;
-      PA.preserveSet<CFGAnalyses>();
-      return PA;
+        return PreservedAnalyses::all();
     }
-    return PreservedAnalyses::all();
-  }
-
-  // Without isRequired returning true, this pass will be skipped for functions
-  // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
-  // all functions with optnone.
-  static bool isRequired() { return true; }
+    // Without isRequired returning true, this pass will be skipped for functions
+    // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
+    // all functions with optnone.
+    static bool isRequired() { return true; }
 };
 
 
@@ -135,7 +142,6 @@ void computeNAF(const APInt &x, APInt &np, APInt &nm) {
     // corresponding pass manager (to be queried if need be)
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
 
-        //outs() << "nice\n";
         bool Changed = false;
         for (auto IterBB = F.begin(); IterBB != F.end(); ++IterBB) {
         BasicBlock &B = *IterBB;
