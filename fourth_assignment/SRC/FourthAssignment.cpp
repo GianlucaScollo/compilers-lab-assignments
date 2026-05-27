@@ -24,7 +24,29 @@ namespace {
         
             bool changed = false;
 
-            for (auto *L : LI)
+            for (auto *LoopIter : LI) {
+                Loop *L1 = *LoopIter; 
+
+                BasicBlock *successor = L1->getExitBlock();
+
+                // controllo se il nostro loop ha un solo punto di uscita (ha dei break?)
+                if (!successor) continue;
+
+                // controllo che il BB successore sia vuoto
+                if (!successor->getFirstNonPHIOrDbg()->isTerminator()) continue;
+
+                BasicBlock *header = successor->getSingleSuccessor();
+                
+                // controllo che header esista
+                if (!header) continue;
+
+                Loop *L2 = LI.getLoopFor(header);
+
+                // controllo che il L2 esista, cioè che header sia un header di un loop
+                if (!L2) continue;
+                
+                // controllo se i due loop non sono entrambi guarded oppure unguarded
+                if (L1.isGuarded() != L2.isGuarded()) continue;
             }
 
             if (changed) {
@@ -41,7 +63,7 @@ namespace {
         // all functions with optnone.
         static bool isRequired() { return true; }
     };
-    
+
 } // namespace
 
 
