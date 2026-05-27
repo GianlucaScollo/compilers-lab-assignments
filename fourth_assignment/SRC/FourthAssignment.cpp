@@ -3,10 +3,7 @@
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/IR/Dominators.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/Argument.h"
+#include "llvm/Analysis/PostDominators.h"
 
 
 using namespace llvm;
@@ -17,31 +14,34 @@ using namespace llvm;
 
 namespace {
 
-  struct LoopFusion: PassInfoMixin<LoopFusion> {
-    // Main entry point, takes IR unit to run the pass on (&F) and the
-    // corresponding pass manager (to be queried if need be)
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
-      LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
-      DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
-      
-      
-      bool changed = false;
+    struct LoopFusion: PassInfoMixin<LoopFusion> {
+        // Main entry point, takes IR unit to run the pass on (&F) and the
+        // corresponding pass manager (to be queried if need be)
+        PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
+            LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
+            DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
+            PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
+        
+            bool changed = false;
 
-      if (changed) {
-          outs() << "La funzione " << F.getName() << " è stata modificata.\n";
-          PreservedAnalyses PA;
-          PA.preserveSet<CFGAnalyses>();
-          return PA;
-      }
-      return PreservedAnalyses::all();
-    }
+            for (auto *L : LI)
+            }
 
-    // Without isRequired returning true, this pass will be skipped for functions
-    // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
-    // all functions with optnone.
-    static bool isRequired() { return true; }
-  };
+            if (changed) {
+                outs() << "La funzione " << F.getName() << " è stata modificata.\n";
+                PreservedAnalyses PA;
+                PA.preserveSet<CFGAnalyses>();
+                return PA;
+            }
+            return PreservedAnalyses::all();
+        }
 
+        // Without isRequired returning true, this pass will be skipped for functions
+        // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
+        // all functions with optnone.
+        static bool isRequired() { return true; }
+    };
+    
 } // namespace
 
 
