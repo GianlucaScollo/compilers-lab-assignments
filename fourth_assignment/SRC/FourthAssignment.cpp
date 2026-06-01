@@ -88,6 +88,17 @@ namespace {
     return (ExitL1 == PreheaderLoop2);
   }
 
+// Verifica Control Flow Equivalence
+static bool isControlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostDominatorTree &PDT) {
+    // L0 deve dominare L1
+    bool dominates = DT.dominates(L0->getHeader(), L1->getHeader());
+    
+    // L1 deve POST-dominare L0 (Attenzione all'ordine degli argomenti!)
+    bool postDominates = PDT.dominates(L1->getHeader(), L0->getHeader());
+    
+    return dominates && postDominates;
+}
+
 
 
 
