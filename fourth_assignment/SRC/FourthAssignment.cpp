@@ -23,42 +23,16 @@ struct LoopPair {
 
 namespace {
 
-  // CONDIZIONE 1
-  // controllo se i due loop sono adiacentri tra di loro
-  // questa funzione si aspetta che L1 precede L2 (e non il viceversa)
-  bool areLoopsAdjacent(Loop *L1, Loop *L2, bool areGuarded) {
+  // struttura dati per salvare i dati relativi ad due loop adiacenti
+struct LoopPair {
+  Loop* L1 = nullptr;
+  Loop* L2 = nullptr;
+  bool areGuarded = false;
+}; // <-- CORREZIONE 1: Aggiunto punto e virgola!
 
-    BasicBlock *EntryBlockLoop2 = L1->getExitBlock();
+namespace {
 
-    // controllo se L1 ha un solo punto di uscita (ha dei break?)
-    // quindi se EntryBlockLoop2 = null restituisco subito false 
-    // (getExitBlock() restituisce null se esistono multiple uscite)
-    if (!EntryBlockLoop2) return false;
-
-    BasicBlock *PreheaderLoop2 = L2->getLoopPreheader();
-
-    // controllo il preheder di L2, verifico che abbia un preheder (cioè che sia in 
-    // forma normale) e che esso sia vuoto (cioè che abbia solo il terminatore)
-    if (!PreheaderLoop2 || !(isBlockSafeForFusion(PreheaderLoop2))) return false;
-
-    // controllo se sono dei loop guarded
-    if (areGuarded) {
-      
-      // otteniamo il blocco di guardia L2
-      BasicBlock *GuardedBlockLoop2 = L2->getLoopGuardBranch()->getParent();
-
-      // controllo che anche la guardia di L2 sia vuota
-      if (!(isBlockSafeForFusion(GuardedBlockLoop2))) return false;
-
-      // verifico che siano uguali
-      return (EntryBlockLoop2 == GuardedBlockLoop2);
-    }
-
-    // verifico che siano uguali
-    return (EntryBlockLoop2 == PreheaderLoop2);
-  }
-  
-  // funzione usata per controllare se i blocchi di guardia / preheder dei due loop sono vuoti
+  // funzione usata per controllare se i blocchi di guardia / preheader dei due loop sono vuoti
   bool isBlockSafeForFusion(BasicBlock *BB) {
     if (!BB) return false;
 
@@ -76,6 +50,42 @@ namespace {
         return false;
     }
     return true;
+  }
+
+  // CONDIZIONE 1
+  // controllo se i due loop sono adiacenti tra di loro
+  // questa funzione si aspetta che L1 precede L2 (e non il viceversa)
+  bool areLoopsAdjacent(Loop *L1, Loop *L2, bool areGuarded) {
+
+    // CORREZIONE 3: Nome variabile coerente e uso di getUniqueExitBlock per sicurezza
+    BasicBlock *ExitL1 = L1->getUniqueExitBlock();
+
+    // controllo se L1 ha un solo punto di uscita. Se null restituisco subito false.
+    if (!ExitL1) return false;
+
+    BasicBlock *PreheaderLoop2 = L2->getLoopPreheader();
+
+    // controllo il preheader di L2, verifico che esista e che sia "vuoto"
+    if (!PreheaderLoop2 || !isBlockSafeForFusion(PreheaderLoop2)) return false;
+
+    // controllo se sono dei loop guarded
+    if (areGuarded) {
+      //Controllo in primis che l'istruzione di branch esista allo scopo di evitare segmentation fault      
+      BranchInst *GuardBranchL2 = L2->getLoopGuardBranch();
+      if (!GuardBranchL2) return false; // Se dicevano che era guarded ma non ha la guardia, fallisce!
+      
+      // Chiamiamo getParent() per ricavare il blocco del guard
+      BasicBlock *GuardedBlockLoop2 = GuardBranchL2->getParent();
+
+      // controllo che anche la guardia di L2 sia vuota
+      if (!isBlockSafeForFusion(GuardedBlockLoop2)) return false;
+
+      // verifico che l'uscita di L1 sbatta contro la guardia di L2
+      return (ExitL1 == GuardedBlockLoop2);
+    }
+
+    // Se non sono guarded, verifico che l'uscita di L1 sbatta contro il preheader di L2
+    return (ExitL1 == PreheaderLoop2);
   }
 
 
