@@ -12,14 +12,6 @@ using namespace llvm;
 // FourthAssignment implementation
 //-----------------------------------------------------------------------------
 
-// struttura dati per salvare i dati relativi ad due loop adiacenti
-struct LoopPair {
-  Loop* L1 = nullptr;
-  Loop* L2 = nullptr;
-  bool areGuarded = false;
-}
-
-
 
 namespace {
 
@@ -100,6 +92,40 @@ static bool isControlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostD
 }
 
 
+void findFusionCandidates(const std::vector<Loop*> &Siblings,SmallVectorImpl<LoopPair> &Candidates,DominatorTree &DT, PostDominatorTree &PDT) {
+    
+    for (Loop *L1 : Siblings) {
+        // Verifica se L1 è guarded controllare in questo modo è più robusto perché ho certezza che esiste blocco di guardia
+        bool isL1Guarded = (L1->getLoopGuardBranch() != nullptr);
+
+        for (Loop *L2 : Siblings) {
+            if (L1 == L2) continue;
+
+            // Verifica se L2 è guarded
+            bool isL2Guarded = (L2->getLoopGuardBranch() != nullptr);
+
+            // Se lo stato guard non coincide, scarta la coppia
+            if (isL1Guarded != isL2Guarded) continue;
+
+            // Controllo adiacenza e dominanza/postdominanza
+            if (areLoopsAdjacent(L1, L2, isL1Guarded) &&  isControlFlowEquivalent(L1,L2,DT,PDT)) {
+                  // se va a buon fine salvo coppia di candidati idonei a salvataggio
+                  Candidates.push_back({L1, L2, isL1Guarded});
+                }
+            }
+        }
+    }
+
+    // Ricorsione nei sotto-livelli
+    for (Loop *L : Siblings) {
+        if (!L->getSubLoops().empty()) {
+            //applico funzione ricorsivamente passando i figli di ogni loop
+            findFusionCandidates(L->getSubLoopsVector(), Candidates, DT, PDT);
+        }
+    }
+}
+
+
 
 
   // fare controllo per capire nel caso in cui i loop sono guarded capire se hanno la stessa semantica
@@ -114,12 +140,18 @@ static bool isControlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostD
       LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
       DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
       PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
-  
+
+      //salvo lista di coppie
+      SmallVector<FusionCandidate, 4> Candidates;
       bool changed = false;
 
-      for (auto *LoopIter : LI) {
-        // ...
-      }
+      //salvo lista di loop top level nel vector TopLevelLoops
+      //Questo costrutto mi permette di iterare partendo da LI.begin() fino a LI.end()
+      //che scansionao i roots della foresta di alberi restituita dall'oggetto LoopInfo LI
+      //Costruisco con range constructor. questo operatore dereferenzia autonomamente 
+      //senza richiedere cast esplicito da iteratore a puntatore a loop
+      std::vector<Loop*> TopLevelLoops(LI.begin(), LI.end());
+      findFusionCandidates(TopLevelLoops, Candidates, DT, PDT);
 
       if (changed) {
         outs() << "La funzione " << F.getName() << " è stata modificata.\n";
