@@ -88,6 +88,23 @@ namespace {
     return TC1 == TC2;
   }
 
+//Proposta modifica della condizione 2, questa variante gestisce anche se le condizioni di terminazione sono contenute dentro a variabili
+  bool haveSameIterationNumber(Loop *L1, Loop *L2, ScalarEvolution &SE) {
+    // 1. Chiediamo l'espressione matematica del numero di iterazioni (Trip Count)
+    const SCEV *TC1 = SE.getBackedgeTakenCount(L1);
+    const SCEV *TC2 = SE.getBackedgeTakenCount(L2);
+
+    // 2. Se LLVM non riesce a risolverla (es. loop con break complessi)
+    if (isa<SCEVCouldNotCompute>(TC1) || isa<SCEVCouldNotCompute>(TC2)) {
+        return false;
+    }
+
+    // 3. Verifichiamo se le due espressioni matematiche sono identiche.
+    // Questo gestisce sia i numeri ("100" == "100") 
+    // sia i simboli variabili ("N - 1" == "N - 1")
+    return TC1 == TC2;
+}
+
   // CONDIZIONE 3
   // Verifica Control Flow Equivalence
   bool isControlFlowEquivalent(Loop *L1, Loop *L2, DominatorTree &DT, PostDominatorTree &PDT) {
@@ -100,10 +117,53 @@ namespace {
     return dominates && postDominates;
   }
 
+
   // CONDIZIONE 4
   // Analisi delle dipendenze
   static bool hasNoDependence(Loop *L1, Loop *L2, DependenceInfo &DI) {
-    //TODO
+    // 1. Raccogliamo SOLO le istruzioni di memoria di L1
+    //dato che forma SSA garantisce che una definizione venga sovrascritta
+    SmallVector<Instruction *, 16> MemInstsL1;
+    for (BasicBlock *BB : L1->blocks()) {
+        for (Instruction &I : *BB) {
+            // mayReadOrWriteMemory() filtra in automatico Load, Store e Call
+            if (I.mayReadOrWriteMemory()) {
+                MemInstsL1.push_back(&I);
+            }
+        }
+    }
+
+    // 2. Raccogliamo SOLO le istruzioni di memoria di L2
+    SmallVector<Instruction *, 16> MemInstsL2;
+    for (BasicBlock *BB : L2->blocks()) {
+        for (Instruction &I : *BB) {
+            if (I.mayReadOrWriteMemory()) {
+                MemInstsL2.push_back(&I);
+            }
+        }
+    }
+
+    // 3. Prodotto Cartesiano: controlliamo ogni memoria di L1 contro ogni memoria di L2
+    for (Instruction *I1 : MemInstsL1) {
+        for (Instruction *I2 : MemInstsL2) {
+            
+            // Chiamiamo l'API della slide del prof
+            // (il terzo parametro 'true' serve per cercare anche dipendenze loop-carried)
+            if (auto Dep = DI.depends(I1, I2, true)) {
+                
+                // Se c'è una dipendenza, dobbiamo capire di che tipo è.
+                // Se ENTRAMBE le istruzioni stanno solo leggendo (Input Dependence), 
+                // non c'è conflitto e possiamo ignorarla.
+                if (Dep->isInput()) {
+                    continue; 
+                }
+
+                // Se arriviamo qui, abbiamo trovato una dipendenza RAW, WAR o WAW.
+                // L'approccio più sicuro è dichiarare i loop NON fondibili.
+                return false; 
+            }
+        }
+    }
     return true;
   }
 
