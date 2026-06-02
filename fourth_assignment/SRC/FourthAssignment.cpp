@@ -4,6 +4,9 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/Analysis/PostDominators.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IR/IntrinsicInst.h"
+#include "llvm/Analysis/ScalarEvolution.h"
+#include "llvm/Analysis/DependenceAnalysis.h"
 
 using namespace llvm;
 
@@ -71,18 +74,40 @@ namespace {
     return (ExitL1 == PreheaderLoop2);
   }
 
+  // CONDIZIONE 2
+  // Verifico che il numero di iterazioni dei due loop sia lo stesso
+  bool haveSameIterationNumber(Loop *L1, Loop *L2, ScalarEvolution &SE) {
+    unsigned int TC1 = SE.getSmallConstantTripCount(L1);
+    unsigned int TC2 = SE.getSmallConstantTripCount(L2);
+
+    // Se ScalarEvolution non riesce a determinare un trip count costante “piccolo”, niente fusion.
+    if (TC1 == 0 || TC2 == 0) {
+      return false;
+    }
+
+    return TC1 == TC2;
+  }
+
+  // CONDIZIONE 3
   // Verifica Control Flow Equivalence
-  bool isControlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostDominatorTree &PDT) {
-    // L0 deve dominare L1
-    bool dominates = DT.dominates(L0->getHeader(), L1->getHeader());
+  bool isControlFlowEquivalent(Loop *L1, Loop *L2, DominatorTree &DT, PostDominatorTree &PDT) {
+    // L1 deve dominare L2
+    bool dominates = DT.dominates(L1->getHeader(), L2->getHeader());
     
-    // L1 deve POST-dominare L0
-    bool postDominates = PDT.dominates(L1->getHeader(), L0->getHeader());
+    // L2 deve POST-dominare L1
+    bool postDominates = PDT.dominates(L2->getHeader(), L1->getHeader());
     
     return dominates && postDominates;
   }
 
-  // NUOVA FUNZIONE: Controlla che due loop guarded abbiano la stessa semantica
+  // CONDIZIONE 4
+  // Analisi delle dipendenze
+  static bool hasNoDependence(Loop *L1, Loop *L2, DependenceInfo &DI) {
+    //TODO
+    return true;
+  }
+
+  // Questa funzione controlla che due loop guarded abbiano la stessa semantica
   bool haveSameGuardSemantics(Loop *L1, Loop *L2) {
       BranchInst *Guard1 = L1->getLoopGuardBranch();
       BranchInst *Guard2 = L2->getLoopGuardBranch();
@@ -101,7 +126,7 @@ namespace {
       return Cmp1->isIdenticalTo(Cmp2);
   }
 
-  void findFusionCandidates(const std::vector<Loop*> &Siblings, SmallVectorImpl<LoopPair> &Candidates, DominatorTree &DT, PostDominatorTree &PDT) {
+  void findFusionCandidates(const std::vector<Loop*> &Siblings, SmallVectorImpl<LoopPair> &Candidates, ScalarEvolution &SE, DominatorTree &DT, PostDominatorTree &PDT, DependenceInfo &DI) {
       for (Loop *L1 : Siblings) {
           bool isL1Guarded = (L1->getLoopGuardBranch() != nullptr);
 
@@ -115,8 +140,8 @@ namespace {
               // Se sono guarded, controlliamo anche che abbiano la stessa semantica
               if (isL1Guarded && !haveSameGuardSemantics(L1, L2)) continue;
 
-              // Controllo adiacenza e dominanza/postdominanza
-              if (areLoopsAdjacent(L1, L2, isL1Guarded) && isControlFlowEquivalent(L1, L2, DT, PDT)) {
+              // Controllo: adiacenza, numero di iterazioni, dominanza/postdominanza e dipendenze
+              if (areLoopsAdjacent(L1, L2, isL1Guarded) && haveSameIterationNumber(L1, L2, SE) && isControlFlowEquivalent(L1, L2, DT, PDT) && hasNoDependence(L1, L2, DI)) {
                   Candidates.push_back({L1, L2, isL1Guarded});
               }
           }
@@ -125,7 +150,7 @@ namespace {
       // Ricorsione nei sotto-livelli
       for (Loop *L : Siblings) {
           if (!L->getSubLoops().empty()) {
-              findFusionCandidates(L->getSubLoopsVector(), Candidates, DT, PDT);
+              findFusionCandidates(L->getSubLoopsVector(), Candidates, SE, DT, PDT, DI);
           }
       }
   }
@@ -133,15 +158,17 @@ namespace {
   struct LoopFusion : PassInfoMixin<LoopFusion> {
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
       LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
+      ScalarEvolution &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
       DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
       PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
+      DependenceInfo &DI = AM.getResult<DependenceAnalysis>(F);
 
       // Usato il nome corretto della Struct: LoopPair
       SmallVector<LoopPair, 4> Candidates;
       bool changed = false;
 
       std::vector<Loop*> TopLevelLoops(LI.begin(), LI.end());
-      findFusionCandidates(TopLevelLoops, Candidates, DT, PDT);
+      findFusionCandidates(TopLevelLoops, Candidates, SE, DT, PDT, DI);
 
       // TODO: Implementare qui l'effettiva fusione logica dei loop candidati
       // Se viene eseguita una fusione, impostare changed = true;
