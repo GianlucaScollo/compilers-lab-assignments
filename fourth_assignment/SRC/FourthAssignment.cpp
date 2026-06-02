@@ -102,6 +102,8 @@ namespace {
     // 3. Verifichiamo se le due espressioni matematiche sono identiche.
     // Questo gestisce sia i numeri ("100" == "100") 
     // sia i simboli variabili ("N - 1" == "N - 1")
+    //https://discourse.llvm.org/t/how-to-compare-scevs/76174
+    //spiegazione del perché posso fare comparazione dei 2 puntatori in modo sicuro
     return TC1 == TC2;
 }
 
