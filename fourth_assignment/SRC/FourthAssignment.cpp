@@ -169,6 +169,56 @@ namespace {
     return true;
   }
 
+//Condizione 4 R2
+ // Analisi delle dipendenze
+  static bool hasNoDependence(Loop *L1, Loop *L2, DependenceInfo &DI) {
+    // 1. Raccogliamo SOLO le istruzioni di memoria di L1
+    //dato che forma SSA garantisce che una definizione venga sovrascritta
+    SmallVector<Instruction *, 16> MemInstsL1;
+    for (BasicBlock *BB : L1->blocks()) {
+        for (Instruction &I : *BB) {
+            // mayReadOrWriteMemory() filtra in automatico Load, Store e Call
+            if (I.mayReadOrWriteMemory()) {
+                MemInstsL1.push_back(&I);
+            }
+        }
+    }
+
+    // 2. Raccogliamo SOLO le istruzioni di memoria di L2
+    SmallVector<Instruction *, 16> MemInstsL2;
+    for (BasicBlock *BB : L2->blocks()) {
+        for (Instruction &I : *BB) {
+            if (I.mayReadOrWriteMemory()) {
+                MemInstsL2.push_back(&I);
+            }
+        }
+    }
+
+    // 3. Prodotto Cartesiano: controlliamo ogni memoria di L1 contro ogni memoria di L2
+    for (Instruction *I1 : MemInstsL1) {
+        for (Instruction *I2 : MemInstsL2) {
+            Value *PtrL1 = getLoadStorePointerOperand(I1);
+            Value *PtrL2 = getLoadStorePointerOperand(I2);
+            
+            // 2. Le convertiamo in equazioni SCEV
+            const SCEV *ScevL1 = SE.getSCEVAtScope(PtrL1, L1);
+            const SCEV *ScevL2 = SE.getSCEVAtScope(PtrL2, L2);
+            
+            // 3. LA REGOLA D'ORO: Indice(L1) - Indice(L2)
+            const SCEV *DistanzaMagica = SE.getMinusSCEV(ScevL1, ScevL2);
+            
+            // 4. Controllo definitivo
+            if (SE.isKnownNegative(DistanzaMagica)) {
+                // Se è negativo, significa che:
+                // - O L2 sta leggendo dal futuro (RAW fallito)
+                // - O L2 sta distruggendo dati non ancora letti (WAR fallito)
+                return false; // BLOCCO LA FUSIONE
+            }
+        }
+    }
+    return true;
+  }
+
   // Questa funzione controlla che due loop guarded abbiano la stessa semantica
   bool haveSameGuardSemantics(Loop *L1, Loop *L2) {
       BranchInst *Guard1 = L1->getLoopGuardBranch();
