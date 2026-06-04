@@ -171,7 +171,7 @@ namespace {
 
 //Condizione 4 R2
  // Analisi delle dipendenze
-  static bool hasNoDependence(Loop *L1, Loop *L2, DependenceInfo &DI) {
+  static bool hasNoDependence(Loop *L1, Loop *L2, ScalarEvolution &SE) {
     // 1. Raccogliamo SOLO le istruzioni di memoria di L1
     //dato che forma SSA garantisce che una definizione venga sovrascritta
     SmallVector<Instruction *, 16> MemInstsL1;
