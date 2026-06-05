@@ -78,7 +78,6 @@ namespace {
   // CONDIZIONE 2
   // Verifico che il numero di iterazioni dei due loop sia lo stesso
   // (gestisce anche quando le condizioni di terminazione sono contenute dentro a variabili)
-  // TODO controllare anche lo step dell'iterazione
   bool haveSameIterationNumber(Loop *L1, Loop *L2, ScalarEvolution &SE) {
     // 1. Chiediamo l'espressione matematica del numero di iterazioni (Trip Count)
     const SCEV *TC1 = SE.getBackedgeTakenCount(L1);
@@ -93,6 +92,23 @@ namespace {
     // Questo gestisce sia i numeri ("100" == "100") 
     // sia i simboli variabili ("N - 1" == "N - 1")
     return TC1 == TC2;
+  }
+
+  // Determina se gli step di incremento del contatore sono uguali
+  bool sameSteps(Loop* L1, Loop* L2, ScalarEvolution &SE){
+    PHINode *iv1 = L1->getInductionVariable(SE);
+    PHINode *iv2 = L2->getInductionVariable(SE);
+    SCEVConstant step1;
+    SCEVConstant step2;
+    if (auto *ar1 = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(iv1)) && auto *ar2 = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(iv2))){
+        step1 = ar1->getStepRecurrence(SE);
+        step2 = ar2->getStepRecurrence(SE);
+    }
+    // Controllo che i valori di step1 e step2 non siano indeterminati
+    if((!SE.isKnownPositive(step1) && !SE.isKnownNegative(step1)) || (!SE.isKnownPositive(step2) && !SE.isKnownNegative(step2)))
+        return false;
+        
+    return SE.getMinusDiff(step1, step2)->isZero();
   }
 
   // CONDIZIONE 3
@@ -238,9 +254,10 @@ namespace {
         if (isL1Guarded && !haveSameGuardSemantics(L1, L2)) continue;
 
         // Controllo: adiacenza, numero di iterazioni, dominanza/postdominanza e dipendenze
-        if (areLoopsAdjacent(L1, L2, isL1Guarded) && haveSameIterationNumber(L1, L2, SE) && isControlFlowEquivalent(L1, L2, DT, PDT) && hasNoNegativeDistanceDeps(L1, L2, SE)) {
+        if (areLoopsAdjacent(L1, L2, isL1Guarded) && haveSameIterationNumber(L1, L2, SE) && sameSteps(L1, L2, SE) && isControlFlowEquivalent(L1, L2, DT, PDT) && hasNoNegativeDistanceDeps(L1, L2, SE)) {
           Candidates.push_back({L1, L2, isL1Guarded});
         }
+        
       }
     }
 
