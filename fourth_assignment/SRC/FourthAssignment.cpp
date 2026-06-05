@@ -6,7 +6,8 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/Analysis/ScalarEvolution.h"
-#include "llvm/Analysis/DependenceAnalysis.h"
+#include "llvm/Analysis/ScalarEvolutionExpressions.h"
+#include "llvm/Analysis/ValueTracking.h" // GetUnderlyingObject
 
 using namespace llvm;
 
@@ -23,7 +24,7 @@ struct LoopPair {
 
 namespace {
 
-  // Funzione usata per controllare se i blocchi di guardia/preheader dei due loop sono vuoti
+  // Funzione helper usata per controllare se i blocchi di guardia/preheader dei due loop sono vuoti
   bool isBlockSafeForFusion(BasicBlock *BB) {
     if (!BB) return false;
 
@@ -76,19 +77,8 @@ namespace {
 
   // CONDIZIONE 2
   // Verifico che il numero di iterazioni dei due loop sia lo stesso
-  bool haveSameIterationNumber(Loop *L1, Loop *L2, ScalarEvolution &SE) {
-    unsigned int TC1 = SE.getSmallConstantTripCount(L1);
-    unsigned int TC2 = SE.getSmallConstantTripCount(L2);
-
-    // Se ScalarEvolution non riesce a determinare un trip count costante “piccolo”, niente fusion.
-    if (TC1 == 0 || TC2 == 0) {
-      return false;
-    }
-
-    return TC1 == TC2;
-  }
-
-//Proposta modifica della condizione 2, questa variante gestisce anche se le condizioni di terminazione sono contenute dentro a variabili
+  // (gestisce anche quando le condizioni di terminazione sono contenute dentro a variabili)
+  // TODO controllare anche lo step dell'iterazione
   bool haveSameIterationNumber(Loop *L1, Loop *L2, ScalarEvolution &SE) {
     // 1. Chiediamo l'espressione matematica del numero di iterazioni (Trip Count)
     const SCEV *TC1 = SE.getBackedgeTakenCount(L1);
@@ -102,10 +92,8 @@ namespace {
     // 3. Verifichiamo se le due espressioni matematiche sono identiche.
     // Questo gestisce sia i numeri ("100" == "100") 
     // sia i simboli variabili ("N - 1" == "N - 1")
-    //https://discourse.llvm.org/t/how-to-compare-scevs/76174
-    //spiegazione del perché posso fare comparazione dei 2 puntatori in modo sicuro
     return TC1 == TC2;
-}
+  }
 
   // CONDIZIONE 3
   // Verifica Control Flow Equivalence
@@ -119,152 +107,178 @@ namespace {
     return dominates && postDominates;
   }
 
-
-  // CONDIZIONE 4
-  // Analisi delle dipendenze
-  static bool hasNoDependence(Loop *L1, Loop *L2, DependenceInfo &DI) {
-    // 1. Raccogliamo SOLO le istruzioni di memoria di L1
-    //dato che forma SSA garantisce che una definizione venga sovrascritta
-    SmallVector<Instruction *, 16> MemInstsL1;
-    for (BasicBlock *BB : L1->blocks()) {
-        for (Instruction &I : *BB) {
-            // mayReadOrWriteMemory() filtra in automatico Load, Store e Call
-            if (I.mayReadOrWriteMemory()) {
-                MemInstsL1.push_back(&I);
-            }
-        }
-    }
-
-    // 2. Raccogliamo SOLO le istruzioni di memoria di L2
-    SmallVector<Instruction *, 16> MemInstsL2;
-    for (BasicBlock *BB : L2->blocks()) {
-        for (Instruction &I : *BB) {
-            if (I.mayReadOrWriteMemory()) {
-                MemInstsL2.push_back(&I);
-            }
-        }
-    }
-
-    // 3. Prodotto Cartesiano: controlliamo ogni memoria di L1 contro ogni memoria di L2
-    for (Instruction *I1 : MemInstsL1) {
-        for (Instruction *I2 : MemInstsL2) {
-            
-            // Chiamiamo l'API della slide del prof
-            // (il terzo parametro 'true' serve per cercare anche dipendenze loop-carried)
-            if (auto Dep = DI.depends(I1, I2, true)) {
-                
-                // Se c'è una dipendenza, dobbiamo capire di che tipo è.
-                // Se ENTRAMBE le istruzioni stanno solo leggendo (Input Dependence), 
-                // non c'è conflitto e possiamo ignorarla.
-                if (Dep->isInput()) {
-                    continue; 
-                }
-
-                // Se arriviamo qui, abbiamo trovato una dipendenza RAW, WAR o WAW.
-                // L'approccio più sicuro è dichiarare i loop NON fondibili.
-                return false; 
-            }
-        }
-    }
-    return true;
+  // Funzione helper per ottenere puntatori di solo load/store 
+  Value *getPtrIfLoadOrStore(Instruction *I) {
+    if (auto *LI = dyn_cast<LoadInst>(I))
+      return LI->getPointerOperand();
+    if (auto *SI = dyn_cast<StoreInst>(I))
+      return SI->getPointerOperand();
+    return nullptr;
   }
 
-//Condizione 4 R2
- // Analisi delle dipendenze
-  static bool hasNoDependence(Loop *L1, Loop *L2, DependenceInfo &DI) {
+  // Funzione helper per controllare che i due valori stiano usando lo stesso oggetto
+  bool sameUnderlyingObject(Value *P1, Value *P2) {
+    if (!P1 || !P2) return false;
+    Value *U1 = GetUnderlyingObject(P1);
+    Value *U2 = GetUnderlyingObject(P2);
+    return U1 == U2;
+  }
+
+  // CONDIZIONE 4
+  // Non deve esistere un caso in cui L2 accede a un indirizzo "più avanti"
+  // rispetto a quello prodotto/aggiornato da L1 alla stessa iterazione,
+  // cioè una forma di "future read/write" -> negative distance.
+  //
+  // Implementazione:
+  // - Considera solo load/store.
+  // - Richiede stesso underlying object.
+  // - Normalizza i due puntatori nello STESSO scope (L1), e confronta le differenze.
+  // - Se non riesce a dimostrare che è safe -> blocca la fusione.
+  bool hasNoNegativeDistanceDeps(Loop *L1, Loop *L2, ScalarEvolution &SE) {
     // 1. Raccogliamo SOLO le istruzioni di memoria di L1
-    //dato che forma SSA garantisce che una definizione venga sovrascritta
-    SmallVector<Instruction *, 16> MemInstsL1;
+    SmallVector<Instruction*, 32> MemInstsL1;
     for (BasicBlock *BB : L1->blocks()) {
-        for (Instruction &I : *BB) {
-            // mayReadOrWriteMemory() filtra in automatico Load, Store e Call
-            if (I.mayReadOrWriteMemory()) {
-                MemInstsL1.push_back(&I);
-            }
+      for (Instruction &I : *BB) {
+        if (isa<LoadInst>(I) || isa<StoreInst>(I)) {
+          MemInstsL1.push_back(&I);
         }
+      }
     }
 
     // 2. Raccogliamo SOLO le istruzioni di memoria di L2
-    SmallVector<Instruction *, 16> MemInstsL2;
+    SmallVector<Instruction*, 32> MemInstsL2;
     for (BasicBlock *BB : L2->blocks()) {
-        for (Instruction &I : *BB) {
-            if (I.mayReadOrWriteMemory()) {
-                MemInstsL2.push_back(&I);
-            }
+      for (Instruction &I : *BB) {
+        if (isa<LoadInst>(I) || isa<StoreInst>(I)) {
+          MemInstsL2.push_back(&I);
         }
+      }
     }
 
-    // 3. Prodotto Cartesiano: controlliamo ogni memoria di L1 contro ogni memoria di L2
+
+    // Usiamo lo stesso scope per confrontare le due espressioni
+    Loop *Scope = L1;
+
     for (Instruction *I1 : MemInstsL1) {
-        for (Instruction *I2 : MemInstsL2) {
-            Value *PtrL1 = getLoadStorePointerOperand(I1);
-            Value *PtrL2 = getLoadStorePointerOperand(I2);
-            
-            // 2. Le convertiamo in equazioni SCEV
-            const SCEV *ScevL1 = SE.getSCEVAtScope(PtrL1, L1);
-            const SCEV *ScevL2 = SE.getSCEVAtScope(PtrL2, L2);
-            
-            // 3. LA REGOLA D'ORO: Indice(L1) - Indice(L2)
-            const SCEV *DistanzaMagica = SE.getMinusSCEV(ScevL1, ScevL2);
-            
-            // 4. Controllo definitivo
-            if (SE.isKnownNegative(DistanzaMagica)) {
-                // Se è negativo, significa che:
-                // - O L2 sta leggendo dal futuro (RAW fallito)
-                // - O L2 sta distruggendo dati non ancora letti (WAR fallito)
-                return false; // BLOCCO LA FUSIONE
-            }
+      Value *P1 = getPtrIfLoadOrStore(I1);
+      if (!P1) continue;
+
+      for (Instruction *I2 : MemInstsL2) {
+        Value *P2 = getPtrIfLoadOrStore(I2);
+        if (!P2) continue;
+
+        // Se sicuramente non è lo stesso oggetto, ignoriamo (nessuna dipendenza tra array diversi)
+        if (!sameUnderlyingObject(P1, P2))
+          continue;
+
+        // Riscriviamo entrambi i puntatori nello stesso scope
+        const SCEV *S1 = SE.getSCEVAtScope(P1, Scope);
+        const SCEV *S2 = SE.getSCEVAtScope(P2, Scope);
+
+        if (isa<SCEVCouldNotCompute>(S1) || isa<SCEVCouldNotCompute>(S2))
+          return false;
+
+        // Differenza tra indirizzi (o offset) nel medesimo scope:
+        // Delta = Ptr(L2) - Ptr(L1)
+        const SCEV *Delta = SE.getMinusSCEV(S2, S1);
+
+        // Controllo se Ptr(L2) è "più avanti" (delta > 0) rispetto a Ptr(L1)
+        
+        // - se SE può provare che Delta è > 0 => blocca
+        if (SE.isKnownPositive(Delta)) {
+          // L2 accede sistematicamente a indirizzi successivi rispetto a L1
+          // es: load A[i+1] vs store A[i]
+          return false;
         }
+
+        // - se SE NON riesce a provare che Delta è <= 0 => blocca
+        if (!SE.isKnownNonPositive(Delta)) {
+          return false;
+        }
+
+        // Se Delta <= 0 provato, per questa coppia siamo ok:
+        // L2 legge lo stesso elemento o uno "precedente"
+      }
     }
+
     return true;
   }
 
   // Questa funzione controlla che due loop guarded abbiano la stessa semantica
   bool haveSameGuardSemantics(Loop *L1, Loop *L2) {
-      BranchInst *Guard1 = L1->getLoopGuardBranch();
-      BranchInst *Guard2 = L2->getLoopGuardBranch();
+    BranchInst *Guard1 = L1->getLoopGuardBranch();
+    BranchInst *Guard2 = L2->getLoopGuardBranch();
 
-      if (!Guard1 || !Guard2 || !Guard1->isConditional() || !Guard2->isConditional())
-          return false;
+    if (!Guard1 || !Guard2 || !Guard1->isConditional() || !Guard2->isConditional())
+      return false;
 
-      auto *Cmp1 = dyn_cast<CmpInst>(Guard1->getCondition());
-      auto *Cmp2 = dyn_cast<CmpInst>(Guard2->getCondition());
+    auto *Cmp1 = dyn_cast<CmpInst>(Guard1->getCondition());
+    auto *Cmp2 = dyn_cast<CmpInst>(Guard2->getCondition());
 
-      // Se non sono istruzioni di comparazione, fallisce
-      if (!Cmp1 || !Cmp2) 
-          return false;
+    // Se non sono istruzioni di comparazione, fallisce
+    if (!Cmp1 || !Cmp2) 
+      return false;
 
-      // isIdenticalTo verifica che operandi e predicato siano esattamente gli stessi
-      return Cmp1->isIdenticalTo(Cmp2);
+    // isIdenticalTo verifica che operandi e predicato siano esattamente gli stessi
+    return Cmp1->isIdenticalTo(Cmp2);
   }
 
-  void findFusionCandidates(const std::vector<Loop*> &Siblings, SmallVectorImpl<LoopPair> &Candidates, ScalarEvolution &SE, DominatorTree &DT, PostDominatorTree &PDT, DependenceInfo &DI) {
-      for (Loop *L1 : Siblings) {
-          bool isL1Guarded = (L1->getLoopGuardBranch() != nullptr);
+  void findFusionCandidates(const std::vector<Loop*> &Siblings, SmallVectorImpl<LoopPair> &Candidates, ScalarEvolution &SE, DominatorTree &DT, PostDominatorTree &PDT) {
+    for (Loop *L1 : Siblings) {
+      bool isL1Guarded = (L1->getLoopGuardBranch() != nullptr);
 
-          for (Loop *L2 : Siblings) {
-              if (L1 == L2) continue;
+      for (Loop *L2 : Siblings) {
+        if (L1 == L2) continue;
 
-              bool isL2Guarded = (L2->getLoopGuardBranch() != nullptr);
+        bool isL2Guarded = (L2->getLoopGuardBranch() != nullptr);
 
-              if (isL1Guarded != isL2Guarded) continue;
+        if (isL1Guarded != isL2Guarded) continue;
 
-              // Se sono guarded, controlliamo anche che abbiano la stessa semantica
-              if (isL1Guarded && !haveSameGuardSemantics(L1, L2)) continue;
+        // Se sono guarded, controlliamo anche che abbiano la stessa semantica
+        if (isL1Guarded && !haveSameGuardSemantics(L1, L2)) continue;
 
-              // Controllo: adiacenza, numero di iterazioni, dominanza/postdominanza e dipendenze
-              if (areLoopsAdjacent(L1, L2, isL1Guarded) && haveSameIterationNumber(L1, L2, SE) && isControlFlowEquivalent(L1, L2, DT, PDT) && hasNoDependence(L1, L2, DI)) {
-                  Candidates.push_back({L1, L2, isL1Guarded});
-              }
-          }
+        // Controllo: adiacenza, numero di iterazioni, dominanza/postdominanza e dipendenze
+        if (areLoopsAdjacent(L1, L2, isL1Guarded) && haveSameIterationNumber(L1, L2, SE) && isControlFlowEquivalent(L1, L2, DT, PDT) && hasNoNegativeDistanceDeps(L1, L2, SE)) {
+          Candidates.push_back({L1, L2, isL1Guarded});
+        }
       }
+    }
 
-      // Ricorsione nei sotto-livelli
-      for (Loop *L : Siblings) {
-          if (!L->getSubLoops().empty()) {
-              findFusionCandidates(L->getSubLoopsVector(), Candidates, SE, DT, PDT, DI);
-          }
+    // Ricorsione nei sotto-livelli
+    for (Loop *L : Siblings) {
+      if (!L->getSubLoops().empty()) {
+        findFusionCandidates(L->getSubLoopsVector(), Candidates, SE, DT, PDT);
       }
+    }
+  }
+
+  // Tramite questa fuzione cerco l'istruzione phi dentro il loop passato come parametro
+  static PHINode *findCanonicalIndVar(Loop *L) {
+    BasicBlock *Header = L->getHeader();
+    BasicBlock *Preheader = L->getLoopPreheader();
+    BasicBlock *Latch = L->getLoopLatch();
+
+    // controllo che esistano (sempre meglio essere sicuri)
+    if (!Header || !Preheader || !Latch) return nullptr;
+
+    for (PHINode &PN : Header->phis()) {
+      Value *Init = PN.getIncomingValueForBlock(Preheader);
+      Value *StepV = PN.getIncomingValueForBlock(Latch);
+      if (!Init || !StepV) continue;
+
+      // StepV deve essere un'istruzione che usa PN (es add PN, C)
+      auto *StepI = dyn_cast<Instruction>(StepV);
+      if (!StepI) continue;
+
+      bool UsesPN = false;
+      for (Value *Op : StepI->operands())
+        if (Op == &PN) { UsesPN = true; break; }
+
+      if (!UsesPN) continue;
+
+      return &PN;
+    }
+    return nullptr;
   }
 
   struct LoopFusion : PassInfoMixin<LoopFusion> {
@@ -273,17 +287,65 @@ namespace {
       ScalarEvolution &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
       DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
       PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
-      DependenceInfo &DI = AM.getResult<DependenceAnalysis>(F);
 
       // Usato il nome corretto della Struct: LoopPair
       SmallVector<LoopPair, 4> Candidates;
       bool changed = false;
 
       std::vector<Loop*> TopLevelLoops(LI.begin(), LI.end());
-      findFusionCandidates(TopLevelLoops, Candidates, SE, DT, PDT, DI);
+      findFusionCandidates(TopLevelLoops, Candidates, SE, DT, PDT);
 
-      // TODO: Implementare qui l'effettiva fusione logica dei loop candidati
-      // Se viene eseguita una fusione, impostare changed = true;
+      // Una volta trovate le coppie di loop da fondere si passa alla fusion
+      // (quindi trasformazione del codice della funzione)
+      for (const LoopPair &P : Candidates) {
+        Loop *L1 = P.L1;
+        Loop *L2 = P.L2;
+
+        BasicBlock *Header1 = L1->getHeader();
+        BasicBlock *Header2 = L2->getHeader();
+        BasicBlock *Latch1  = L1->getLoopLatch();
+        BasicBlock *Latch2  = L2->getLoopLatch();
+        BasicBlock *Exit2   = L2->getUniqueExitBlock();
+
+        // controllo che esistano (sempre meglio essere sicuri) 
+        if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit2)
+          continue;
+
+        // 1) Unifica IV
+        PHINode *IV1 = findCanonicalIndVar(L1);
+        PHINode *IV2 = findCanonicalIndVar(L2);
+        if (!IV1 || !IV2)
+          continue;
+
+        IV2->replaceAllUsesWith(IV1);
+
+        // 2) Rewire latch1: al posto di tornare a header1, vai a header2
+        auto *BI1 = dyn_cast<BranchInst>(Latch1->getTerminator());
+        if (!BI1 || !BI1->isConditional()) continue;
+
+        // bisogna capire quale successor è "backedge" verso Header1:
+        for (unsigned s = 0; s < BI1->getNumSuccessors(); ++s) {
+          if (BI1->getSuccessor(s) == Header1) {
+            BI1->setSuccessor(s, Header2);
+          }
+        }
+
+        // 3) Rewire latch2: al posto di tornare a header2, torna a header1 (backedge unico)
+        auto *BI2 = dyn_cast<BranchInst>(Latch2->getTerminator());
+        if (!BI2 || !BI2->isConditional()) continue;
+
+        for (unsigned s = 0; s < BI2->getNumSuccessors(); ++s) {
+          if (BI2->getSuccessor(s) == Header2) {
+            BI2->setSuccessor(s, Header1);
+          }
+        }
+
+        // 4) Aggiustare PHI nodes in Header2 / Header1 se necessario
+        // (Spesso necessario: quando cambi predecessori di un header devi aggiornare i PHI)
+        // Qui serve codice extra per rimuovere incoming non più validi e aggiungerne di nuovi.
+
+        changed = true;
+      }
 
       if (changed) {
         outs() << "La funzione " << F.getName() << " è stata modificata.\n";
