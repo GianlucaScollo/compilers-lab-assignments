@@ -259,37 +259,15 @@ namespace {
           continue;
         }
 
-        // Controllo l'adiacenza dei due loop
-        if (!areLoopsAdjacent(L1, L2, isL1Guarded)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non sono adiacenti";
-          continue;
+        // Controllo: adiacenza, numero di iterazioni, dominanza/postdominanza e dipendenze
+        if (areLoopsAdjacent(L1, L2, isL1Guarded) && 
+            haveSameIterationNumber(L1, L2, SE) && 
+            sameSteps(L1, L2, SE) && 
+            isControlFlowEquivalent(L1, L2, DT, PDT) && 
+            hasNoNegativeDistanceDeps(L1, L2, SE)) {
+          Candidates.push_back({L1, L2, isL1Guarded});
         }
-
-        // Controllo il numero di iterazioni dei due loop
-        if (!haveSameIterationNumber(L1, L2, SE)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso numero di iterazioni";
-          continue;
-        }
-
-        // Controllo che i due loop abbiano lo stesso step
-        if (!sameSteps(L1, L2, SE)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso step";
-          continue;
-        }
-
-        // Controllo che il Control Flow dei due loop sia equivalente
-        if (!isControlFlowEquivalent(L1, L2, DT, PDT)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno un Control Flow equivalente";
-          continue;
-        }
-
-        // Controllo che i due loop non abbiano una NegativeDistanceDeps
-        if (!hasNoNegativeDistanceDeps(L1, L2, SE)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " hanno una NegativeDistanceDeps";
-          continue;
-        }
-
-        Candidates.push_back({L1, L2, isL1Guarded});
+        
       }
     }
 
@@ -349,64 +327,62 @@ namespace {
       for (const LoopPair &P : Candidates) {
         Loop *L1 = P.L1;
         Loop *L2 = P.L2;
-
-        BasicBlock *Header1 = L1->getHeader();
-        BasicBlock *Header2 = L2->getHeader();
-        BasicBlock *Latch1  = L1->getLoopLatch();
-        BasicBlock *Latch2  = L2->getLoopLatch();
-        BasicBlock *Exit2   = L2->getUniqueExitBlock();
-
-        // controllo che esistano (sempre meglio essere sicuri) 
-        if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit2){
-          outs() << "ERRORE: E' avvenuto un errore sconosciuto durante la lettura delle componenti dei loop " << L1 << " ed " << L2;
-          continue;
+        BasicBlock *PreHeader2 = L2->getLoopPreheader();
+        BasicBlock *Header1  = L1->getHeader();
+        BasicBlock *Header2  = L2->getHeader();
+        BasicBlock *Latch1   = L1->getLoopLatch();
+        BasicBlock *Latch2   = L2->getLoopLatch();
+        BasicBlock *Exit2    = L2->getUniqueExitBlock();
+        
+        if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit2 || !PreHeader2) {
+            outs() << "ERRORE nel loop della funzione: " << F.getName() << "\n"; 
+            continue;
         }
-          
 
         // 1) Unifica IV
         PHINode *IV1 = findCanonicalIndVar(L1);
         PHINode *IV2 = findCanonicalIndVar(L2);
-        if (!IV1 || !IV2){
-          outs() << "ERRORE: Impossibile recuperare i PHI node dai loop " << L1 << " ed " << L2;
-          continue;
-        }
-          
+        if (!IV1 || !IV2) continue;
 
         IV2->replaceAllUsesWith(IV1);
+        IV2->eraseFromParent();
 
-        // 2) Rewire latch1: al posto di tornare a header1, vai a header2
+        // 2) Rewire Latch1 -> Header2
         auto *BI1 = dyn_cast<BranchInst>(Latch1->getTerminator());
-        if (!BI1 || !BI1->isConditional()) continue;
-
-        // bisogna capire quale successor è "backedge" verso Header1:
-        for (unsigned s = 0; s < BI1->getNumSuccessors(); ++s) {
-          if (BI1->getSuccessor(s) == Header1) {
-            BI1->setSuccessor(s, Header2);
-          }
+        if (!BI1) continue;
+        if (!BI1->isConditional()) {             
+            BI1->setSuccessor(0, Header2);
+        } else {
+            for (unsigned s = 0; s < BI1->getNumSuccessors(); ++s)
+                if (BI1->getSuccessor(s) == Header1)
+                    BI1->setSuccessor(s, Header2);
         }
 
-        // 3) Rewire latch2: al posto di tornare a header2, torna a header1 (backedge unico)
+        // 3) Rewire Latch2 -> Header1 (backedge unico del loop fuso)
         auto *BI2 = dyn_cast<BranchInst>(Latch2->getTerminator());
-        if (!BI2 || !BI2->isConditional()) continue;
-
-        for (unsigned s = 0; s < BI2->getNumSuccessors(); ++s) {
-          if (BI2->getSuccessor(s) == Header2) {
-            BI2->setSuccessor(s, Header1);
-          }
+        if (!BI2) continue;
+        if (!BI2->isConditional()) {
+            BI2->setSuccessor(0, Header1);
+        } else {
+            for (unsigned s = 0; s < BI2->getNumSuccessors(); ++s)
+                if (BI2->getSuccessor(s) == Header2)
+                    BI2->setSuccessor(s, Header1);
         }
 
-        // 4) Aggiustare PHI nodes in Header2 / Header1 se necessario
-        // (Spesso necessario: quando cambi predecessori di un header devi aggiornare i PHI)
-        // Qui serve codice extra per rimuovere incoming non più validi e aggiungerne di nuovi.
+        for (PHINode &PHI : Header2->phis()) {
+            int Idx = PHI.getBasicBlockIndex(PreHeader2);
+            if (Idx < 0) continue;
+            Value *InVal = PHI.getIncomingValue(Idx);
+            PHI.removeIncomingValue(Idx);
+            PHI.addIncoming(InVal, Latch1);
+        }
 
         changed = true;
       }
 
       if (changed) {
         outs() << "La funzione " << F.getName() << " è stata modificata.\n";
-        PreservedAnalyses PA;
-        PA.preserveSet<CFGAnalyses>();
-        return PA;
+        return PreservedAnalyses::none();
       }
       return PreservedAnalyses::all();
     }
