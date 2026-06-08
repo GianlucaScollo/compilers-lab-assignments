@@ -7,7 +7,7 @@
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
-#include "llvm/Analysis/ValueTracking.h" // GetUnderlyingObject
+#include "llvm/Analysis/ValueTracking.h" // getUnderlyingObject
 
 using namespace llvm;
 
@@ -98,17 +98,21 @@ namespace {
   bool sameSteps(Loop* L1, Loop* L2, ScalarEvolution &SE){
     PHINode *iv1 = L1->getInductionVariable(SE);
     PHINode *iv2 = L2->getInductionVariable(SE);
-    SCEVConstant step1;
-    SCEVConstant step2;
-    if (auto *ar1 = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(iv1)) && auto *ar2 = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(iv2))){
-        step1 = ar1->getStepRecurrence(SE);
-        step2 = ar2->getStepRecurrence(SE);
+    auto ar1 = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(iv1));
+    auto ar2 = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(iv2));
+
+    if (!ar1 || !ar2){
+        return false;
     }
+
+    auto step1 = ar1->getStepRecurrence(SE);
+    auto step2 = ar2->getStepRecurrence(SE);
+
     // Controllo che i valori di step1 e step2 non siano indeterminati
     if((!SE.isKnownPositive(step1) && !SE.isKnownNegative(step1)) || (!SE.isKnownPositive(step2) && !SE.isKnownNegative(step2)))
         return false;
         
-    return SE.getMinusDiff(step1, step2)->isZero();
+    return SE.getMinusSCEV(step1, step2)->isZero();
   }
 
   // CONDIZIONE 3
@@ -135,8 +139,8 @@ namespace {
   // Funzione helper per controllare che i due valori stiano usando lo stesso oggetto
   bool sameUnderlyingObject(Value *P1, Value *P2) {
     if (!P1 || !P2) return false;
-    Value *U1 = GetUnderlyingObject(P1);
-    Value *U2 = GetUnderlyingObject(P2);
+    Value *U1 = getUnderlyingObject(P1);
+    Value *U2 = getUnderlyingObject(P2);
     return U1 == U2;
   }
 
