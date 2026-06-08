@@ -253,57 +253,57 @@ namespace {
         bool isL2Guarded = (L2->getLoopGuardBranch() != nullptr);
 
         if (isL1Guarded != isL2Guarded){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno entrambi una guardia";
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno entrambi una guardia\n";
           continue;
         }
 
         // Se sono guarded, controlliamo anche che abbiano la stessa semantica
-        outs() << "Inizio controllo della semantica della guardia di L1 e L2";
+        outs() << "Inizio controllo della semantica della guardia di L1 e L2\n";
         if (isL1Guarded && !haveSameGuardSemantics(L1, L2)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno la stessa guardia";
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno la stessa guardia\n";
           continue;
         }
-        outs() << "Fine controllo della semantica della guardia di L1 e L2: SUPERATO";
+        outs() << "Fine controllo della semantica della guardia di L1 e L2: SUPERATO\n";
 
         // Controllo l'adiacenza dei due loop
-        outs() << "Inizio controllo adiacenza di L1 e L2";
+        outs() << "Inizio controllo adiacenza di L1 e L2\n";
         if (!areLoopsAdjacent(L1, L2, isL1Guarded)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non sono adiacenti";
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non sono adiacenti\n";
           continue;
         }
-        outs() << "Fine controllo adiacenza di L1 e L2: SUPERATO";
+        outs() << "Fine controllo adiacenza di L1 e L2: SUPERATO\n";
 
         // Controllo il numero di iterazioni dei due loop
-        outs() << "Inizio controllo trip count di L1 e L2";
+        outs() << "Inizio controllo trip count di L1 e L2\n";
         if (!haveSameIterationNumber(L1, L2, SE)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso numero di iterazioni";
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso numero di iterazioni\n";
           continue;
         }
-        outs() << "Fine controllo adiacenza di L1 e L2: SUPERATO";
+        outs() << "Fine controllo adiacenza di L1 e L2: SUPERATO\n";
 
         // Controllo che i due loop abbiano lo stesso step
-        outs() << "Inizio controllo step di L1 e L2";
+        outs() << "Inizio controllo step di L1 e L2\n";
         if (!sameSteps(L1, L2, SE)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso step";
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso step\n";
           continue;
         }
-        outs() << "Fine controllo step di L1 e L2: SUPERATO";
+        outs() << "Fine controllo step di L1 e L2: SUPERATO\n";
 
         // Controllo che il Control Flow dei due loop sia equivalente
-        outs() << "Inizio controllo di equivalenza di control flow di L1 e L2";
+        outs() << "Inizio controllo di equivalenza di control flow di L1 e L2\n";
         if (!isControlFlowEquivalent(L1, L2, DT, PDT)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno un Control Flow equivalente";
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno un Control Flow equivalente\n";
           continue;
         }
-        outs() << "Fine controllo di equivalenza di control flow di L1 e L2: SUPERATO";
+        outs() << "Fine controllo di equivalenza di control flow di L1 e L2: SUPERATO\n";
 
         // Controllo che i due loop non abbiano una NegativeDistanceDeps
-        outs() << "Inizio controllo dipendenze di L1 e L2";
+        outs() << "Inizio controllo dipendenze di L1 e L2\n";
         if (!hasNoNegativeDistanceDeps(L1, L2, SE)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " hanno una NegativeDistanceDeps";
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " hanno una NegativeDistanceDeps\n";
           continue;
         }
-        outs() << "Fine controllo dipendenze di L1 e L2: SUPERATO";
+        outs() << "Fine controllo dipendenze di L1 e L2: SUPERATO\n";
 
         Candidates.push_back({L1, L2, isL1Guarded});
       }
@@ -358,15 +358,15 @@ namespace {
       bool changed = false;
 
       std::vector<Loop*> TopLevelLoops(LI.begin(), LI.end());
-      outs() << "Inizio ricerca candidati alla fusione";
+      outs() << "Inizio ricerca candidati alla fusione\n";
       findFusionCandidates(TopLevelLoops, Candidates, SE, DT, PDT);
-      outs() << "Fine ricerca candidati alla fusione";
+      outs() << "Fine ricerca candidati alla fusione\n";
 
       if (Candidates.size() <= 0){
-        outs() << "Nessun candidato trovato per la fusione";
+        outs() << "Nessun candidato trovato per la fusione\n";
       }
       else{
-        outs() << "Candidati trovati: inizio fusione";
+        outs() << "Candidati trovati: inizio fusione\n";
       }
 
       // Una volta trovate le coppie di loop da fondere si passa alla fusion
@@ -423,7 +423,7 @@ namespace {
             PHI.removeIncomingValue(Idx);
             PHI.addIncoming(InVal, Latch1);
         }
-        outs() << "Fine fusione";
+        outs() << "Fine fusione\n";
         changed = true;
       }
 
@@ -447,7 +447,7 @@ llvm::PassPluginLibraryInfo getFourthAssignmentPluginInfo() {
       PB.registerPipelineParsingCallback(
         [](StringRef Name, FunctionPassManager &FPM,
           ArrayRef<PassBuilder::PipelineElement>) {
-              if (Name == "loop-fusion") {
+              if (Name == "lf") {
                 FPM.addPass(LoopFusion());
                 return true;
               }
