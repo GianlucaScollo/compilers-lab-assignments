@@ -263,15 +263,37 @@ namespace {
           continue;
         }
 
-        // Controllo: adiacenza, numero di iterazioni, dominanza/postdominanza e dipendenze
-        if (areLoopsAdjacent(L1, L2, isL1Guarded) && 
-            haveSameIterationNumber(L1, L2, SE) && 
-            sameSteps(L1, L2, SE) && 
-            isControlFlowEquivalent(L1, L2, DT, PDT) && 
-            hasNoNegativeDistanceDeps(L1, L2, SE)) {
-          Candidates.push_back({L1, L2, isL1Guarded});
+        // Controllo l'adiacenza dei due loop
+        if (!areLoopsAdjacent(L1, L2, isL1Guarded)){
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non sono adiacenti";
+          continue;
         }
         
+        // Controllo il numero di iterazioni dei due loop
+        if (!haveSameIterationNumber(L1, L2, SE)){
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso numero di iterazioni";
+          continue;
+        }
+
+        // Controllo che i due loop abbiano lo stesso step
+        if (!sameSteps(L1, L2, SE)){
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso step";
+          continue;
+        }
+
+        // Controllo che il Control Flow dei due loop sia equivalente
+        if (!isControlFlowEquivalent(L1, L2, DT, PDT)){
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno un Control Flow equivalente";
+          continue;
+        }
+
+        // Controllo che i due loop non abbiano una NegativeDistanceDeps
+        if (!hasNoNegativeDistanceDeps(L1, L2, SE)){
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " hanno una NegativeDistanceDeps";
+          continue;
+        }
+
+        Candidates.push_back({L1, L2, isL1Guarded});
       }
     }
 
