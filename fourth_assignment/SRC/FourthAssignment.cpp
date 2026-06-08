@@ -248,13 +248,23 @@ namespace {
 
         bool isL2Guarded = (L2->getLoopGuardBranch() != nullptr);
 
-        if (isL1Guarded != isL2Guarded) continue;
+        if (isL1Guarded != isL2Guarded){
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno entrambi una guardia";
+          continue;
+        }
 
         // Se sono guarded, controlliamo anche che abbiano la stessa semantica
-        if (isL1Guarded && !haveSameGuardSemantics(L1, L2)) continue;
+        if (isL1Guarded && !haveSameGuardSemantics(L1, L2)){
+          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno la stessa guardia";
+          continue;
+        }
 
         // Controllo: adiacenza, numero di iterazioni, dominanza/postdominanza e dipendenze
-        if (areLoopsAdjacent(L1, L2, isL1Guarded) && haveSameIterationNumber(L1, L2, SE) && sameSteps(L1, L2, SE) && isControlFlowEquivalent(L1, L2, DT, PDT) && hasNoNegativeDistanceDeps(L1, L2, SE)) {
+        if (areLoopsAdjacent(L1, L2, isL1Guarded) && 
+            haveSameIterationNumber(L1, L2, SE) && 
+            sameSteps(L1, L2, SE) && 
+            isControlFlowEquivalent(L1, L2, DT, PDT) && 
+            hasNoNegativeDistanceDeps(L1, L2, SE)) {
           Candidates.push_back({L1, L2, isL1Guarded});
         }
         
@@ -325,14 +335,20 @@ namespace {
         BasicBlock *Exit2   = L2->getUniqueExitBlock();
 
         // controllo che esistano (sempre meglio essere sicuri) 
-        if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit2)
+        if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit2){
+          outs() << "ERRORE: E' avvenuto un errore sconosciuto durante la lettura delle componenti dei loop " << L1 << " ed " << L2;
           continue;
+        }
+          
 
         // 1) Unifica IV
         PHINode *IV1 = findCanonicalIndVar(L1);
         PHINode *IV2 = findCanonicalIndVar(L2);
-        if (!IV1 || !IV2)
+        if (!IV1 || !IV2){
+          outs() << "ERRORE: Impossibile recuperare i PHI node dai loop " << L1 << " ed " << L2;
           continue;
+        }
+          
 
         IV2->replaceAllUsesWith(IV1);
 
