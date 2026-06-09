@@ -282,12 +282,12 @@ namespace {
         outs() << "Fine controllo adiacenza di L1 e L2: SUPERATO\n";
 
         // Controllo che i due loop abbiano lo stesso step
-        outs() << "Inizio controllo step di L1 e L2\n";
+        /*outs() << "Inizio controllo step di L1 e L2\n";
         if (!sameSteps(L1, L2, SE)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso step\n";
           continue;
         }
-        outs() << "Fine controllo step di L1 e L2: SUPERATO\n";
+        outs() << "Fine controllo step di L1 e L2: SUPERATO\n";*/
 
         // Controllo che il Control Flow dei due loop sia equivalente
         outs() << "Inizio controllo di equivalenza di control flow di L1 e L2\n";
@@ -298,12 +298,12 @@ namespace {
         outs() << "Fine controllo di equivalenza di control flow di L1 e L2: SUPERATO\n";
 
         // Controllo che i due loop non abbiano una NegativeDistanceDeps
-        outs() << "Inizio controllo dipendenze di L1 e L2\n";
+        /*outs() << "Inizio controllo dipendenze di L1 e L2\n";
         if (!hasNoNegativeDistanceDeps(L1, L2, SE)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " hanno una NegativeDistanceDeps\n";
           continue;
         }
-        outs() << "Fine controllo dipendenze di L1 e L2: SUPERATO\n";
+        outs() << "Fine controllo dipendenze di L1 e L2: SUPERATO\n";*/
 
         Candidates.push_back({L1, L2, isL1Guarded});
       }
@@ -336,11 +336,16 @@ namespace {
       if (!StepI) continue;
 
       bool UsesPN = false;
-      for (Value *Op : StepI->operands())
+      /*for (Value *Op : StepI->operands())
         if (Op == &PN) { UsesPN = true; break; }
 
-      if (!UsesPN) continue;
-
+      if (!UsesPN) continue;*/
+      for(User* u : PN.users()){
+        if(u == StepI){
+          UsesPN = true;
+          break;
+        }
+      }
       return &PN;
     }
     return nullptr;
@@ -379,6 +384,7 @@ namespace {
         BasicBlock *Header2  = L2->getHeader();
         BasicBlock *Latch1   = L1->getLoopLatch();
         BasicBlock *Latch2   = L2->getLoopLatch();
+        BasicBlock *Exit1    = L1->getUniqueExitBlock();
         BasicBlock *Exit2    = L2->getUniqueExitBlock();
         
         if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit2 || !PreHeader2) {
@@ -386,7 +392,7 @@ namespace {
             continue;
         }
 
-        // 1) Unifica IV
+        // Unifica IV
         PHINode *IV1 = findCanonicalIndVar(L1);
         PHINode *IV2 = findCanonicalIndVar(L2);
         if (!IV1 || !IV2) continue;
@@ -394,27 +400,21 @@ namespace {
         IV2->replaceAllUsesWith(IV1);
         IV2->eraseFromParent();
 
-        // 2) Rewire Latch1 -> Header2
-        auto *BI1 = dyn_cast<BranchInst>(Latch1->getTerminator());
-        if (!BI1) continue;
-        if (!BI1->isConditional()) {             
-            BI1->setSuccessor(0, Header2);
-        } else {
-            for (unsigned s = 0; s < BI1->getNumSuccessors(); ++s)
-                if (BI1->getSuccessor(s) == Header1)
-                    BI1->setSuccessor(s, Header2);
+        // 1) Header1 -> Exit2
+        Header1->getTerminator()->replaceSuccessorWith(Exit1, Exit2);
+
+        // 2) Body1 -> Body2 --- dai predecessori di Latch1 vai al successore 0 di Header2
+        for (BasicBlock *Pred : predecessors(Latch1)) {
+          Pred->getTerminator()->replaceSuccessorWith(Latch1, Header2->getTerminator()->getSuccessor(0));
         }
 
-        // 3) Rewire Latch2 -> Header1 (backedge unico del loop fuso)
-        auto *BI2 = dyn_cast<BranchInst>(Latch2->getTerminator());
-        if (!BI2) continue;
-        if (!BI2->isConditional()) {
-            BI2->setSuccessor(0, Header1);
-        } else {
-            for (unsigned s = 0; s < BI2->getNumSuccessors(); ++s)
-                if (BI2->getSuccessor(s) == Header2)
-                    BI2->setSuccessor(s, Header1);
+        // 3) Body2 -> Latch1 -- dai predecessori di Latch2 vai a Latch1
+        for (BasicBlock *Pred : predecessors(Latch2)) {
+          Pred->getTerminator()->replaceSuccessorWith(Latch2, Latch1);
         }
+
+        // 4) Header2 -> Latch2
+        Header2->getTerminator()->setSuccessor(1, Latch2);
 
         for (PHINode &PHI : Header2->phis()) {
             int Idx = PHI.getBasicBlockIndex(PreHeader2);
