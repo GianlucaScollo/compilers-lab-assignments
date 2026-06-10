@@ -94,7 +94,7 @@ namespace {
     return TC1 == TC2;
   }
 
-  // Determina se gli step di incremento del contatore sono uguali
+  /*// Determina se gli step di incremento del contatore sono uguali
   bool sameSteps(Loop* L1, Loop* L2, ScalarEvolution &SE){
     PHINode *iv1 = L1->getInductionVariable(SE);
     PHINode *iv2 = L2->getInductionVariable(SE);
@@ -113,7 +113,7 @@ namespace {
         return false;
         
     return SE.getMinusSCEV(step1, step2)->isZero();
-  }
+  }*/
 
   // CONDIZIONE 3
   // Verifica Control Flow Equivalence
@@ -258,52 +258,52 @@ namespace {
         }
 
         // Se sono guarded, controlliamo anche che abbiano la stessa semantica
-        outs() << "Inizio controllo della semantica della guardia di L1 e L2\n";
+        outs() << "Inizio controllo della semantica della guardia di "<< L1 <<" e " << L2 << "\n";
         if (isL1Guarded && !haveSameGuardSemantics(L1, L2)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno la stessa guardia\n";
           continue;
         }
-        outs() << "Fine controllo della semantica della guardia di L1 e L2: SUPERATO\n";
+        outs() << "Fine controllo della semantica della guardia di "<< L1 <<" e " << L2 << ": SUPERATO\n";
 
         // Controllo l'adiacenza dei due loop
-        outs() << "Inizio controllo adiacenza di L1 e L2\n";
+        outs() << "Inizio controllo adiacenza di "<< L1 <<" e " << L2 << "\n";
         if (!areLoopsAdjacent(L1, L2, isL1Guarded)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non sono adiacenti\n";
           continue;
         }
-        outs() << "Fine controllo adiacenza di L1 e L2: SUPERATO\n";
+        outs() << "Fine controllo adiacenza di "<< L1 <<" e " << L2 << ": SUPERATO\n";
 
         // Controllo il numero di iterazioni dei due loop
-        outs() << "Inizio controllo trip count di L1 e L2\n";
+        outs() << "Inizio controllo trip count di "<< L1 <<" e " << L2 << "\n";
         if (!haveSameIterationNumber(L1, L2, SE)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso numero di iterazioni\n";
           continue;
         }
-        outs() << "Fine controllo adiacenza di L1 e L2: SUPERATO\n";
+        outs() << "Fine controllo adiacenza di "<< L1 <<" e " << L2 << ": SUPERATO\n";
 
-        // Controllo che i due loop abbiano lo stesso step
-        /*outs() << "Inizio controllo step di L1 e L2\n";
+        /*// Controllo che i due loop abbiano lo stesso step
+        outs() << "Inizio controllo step di "<< L1 <<" e " << L2 << "\n";
         if (!sameSteps(L1, L2, SE)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso step\n";
           continue;
         }
-        outs() << "Fine controllo step di L1 e L2: SUPERATO\n";*/
+        outs() << "Fine controllo step di "<< L1 <<" e " << L2 << ": SUPERATO\n";*/
 
         // Controllo che il Control Flow dei due loop sia equivalente
-        outs() << "Inizio controllo di equivalenza di control flow di L1 e L2\n";
+        outs() << "Inizio controllo di equivalenza di control flow di "<< L1 <<" e " << L2 << "\n";
         if (!isControlFlowEquivalent(L1, L2, DT, PDT)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno un Control Flow equivalente\n";
           continue;
         }
-        outs() << "Fine controllo di equivalenza di control flow di L1 e L2: SUPERATO\n";
+        outs() << "Fine controllo di equivalenza di control flow di "<< L1 <<" e " << L2 << ": SUPERATO\n";
 
         // Controllo che i due loop non abbiano una NegativeDistanceDeps
-        /*outs() << "Inizio controllo dipendenze di L1 e L2\n";
+        outs() << "Inizio controllo dipendenze di "<< L1 <<" e " << L2 << "\n";
         if (!hasNoNegativeDistanceDeps(L1, L2, SE)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " hanno una NegativeDistanceDeps\n";
           continue;
         }
-        outs() << "Fine controllo dipendenze di L1 e L2: SUPERATO\n";*/
+        outs() << "Fine controllo dipendenze di "<< L1 <<" e " << L2 << ": SUPERATO\n";
 
         Candidates.push_back({L1, L2, isL1Guarded});
       }
@@ -351,17 +351,45 @@ namespace {
     return nullptr;
   }
 
+  BasicBlock *getBodyEntry(Loop *L) {
+    BranchInst *BI = dyn_cast<BranchInst>(L->getHeader()->getTerminator());
+    if (L->contains(BI->getSuccessor(0)))
+        return BI->getSuccessor(0);
+    return BI->getSuccessor(1); 
+  }
+
+  Value *getPHIValue(BasicBlock *BB, BasicBlock *Pred) {
+    for (PHINode &PHI : BB->phis()) {
+      int id = PHI.getBasicBlockIndex(Pred);
+        if (id != -1)
+            return PHI.getIncomingValue(id);
+    }
+    return nullptr;
+  }
+
+  void setPHIValue(BasicBlock *BB, BasicBlock *Pred, Value* v) {
+    for (PHINode &PHI : BB->phis()) {
+      int id = PHI.getBasicBlockIndex(Pred);
+        if (id != -1)
+            PHI.setIncomingValue(id, v);
+    }
+  }
+
   struct LoopFusion : PassInfoMixin<LoopFusion> {
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
       LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
       ScalarEvolution &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
       DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
       PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
+      bool changed = false;
+
+      for(Loop* l : LI)
+        if(!l->isLoopSimplifyForm())
+          simplifyLoop(l, &DT, &LI, &SE, nullptr, nullptr, false);
 
       // Usato il nome corretto della Struct: LoopPair
       SmallVector<LoopPair, 4> Candidates;
-      bool changed = false;
-
+      
       std::vector<Loop*> TopLevelLoops(LI.begin(), LI.end());
       outs() << "Inizio ricerca candidati alla fusione\n";
       findFusionCandidates(TopLevelLoops, Candidates, SE, DT, PDT);
@@ -379,9 +407,14 @@ namespace {
       for (const LoopPair &P : Candidates) {
         Loop *L1 = P.L1;
         Loop *L2 = P.L2;
-        BasicBlock *PreHeader2 = L2->getLoopPreheader();
+        
         BasicBlock *Header1  = L1->getHeader();
         BasicBlock *Header2  = L2->getHeader();
+
+        // Primi basic blocks dei body dei rispettivi loop. Potrebbero coincidere con i latch
+        BasicBlock *BodyEntry1 = getBodyEntry(L1);
+        BasicBlock *BodyEntry2 = getBodyEntry(L2);
+
         BasicBlock *Latch1   = L1->getLoopLatch();
         BasicBlock *Latch2   = L2->getLoopLatch();
         BasicBlock *Exit1    = L1->getUniqueExitBlock();
@@ -400,32 +433,26 @@ namespace {
         IV2->replaceAllUsesWith(IV1);
         IV2->eraseFromParent();
 
-        // 1) Header1 -> Exit2
+        // Header1 false -> Exit2
+        Exit2->removePredecessor(Header2);
         Header1->getTerminator()->replaceSuccessorWith(Exit1, Exit2);
+        
+        Value* phiValue = getPHIValue(Header1, Latch1);
 
-        // 2) Body1 -> Body2 --- dai predecessori di Latch1 vai al successore 0 di Header2
-        for (BasicBlock *Pred : predecessors(Latch1)) {
-          Pred->getTerminator()->replaceSuccessorWith(Latch1, Header2->getTerminator()->getSuccessor(0));
-        }
+        Latch1->getTerminator()->replaceSuccessorWith(Header1, BodyEntry2);
+        Latch2->getTerminator()->replaceSuccessorWith(Header2, Header1);
 
-        // 3) Body2 -> Latch1 -- dai predecessori di Latch2 vai a Latch1
-        for (BasicBlock *Pred : predecessors(Latch2)) {
-          Pred->getTerminator()->replaceSuccessorWith(Latch2, Latch1);
-        }
-
-        // 4) Header2 -> Latch2
-        Header2->getTerminator()->setSuccessor(1, Latch2);
-
-        for (PHINode &PHI : Header2->phis()) {
-            int Idx = PHI.getBasicBlockIndex(PreHeader2);
-            if (Idx < 0) continue;
-            Value *InVal = PHI.getIncomingValue(Idx);
-            PHI.removeIncomingValue(Idx);
-            PHI.addIncoming(InVal, Latch1);
-        }
+        Header1->replacePhiUsesWith(Latch1, Latch2);
+        setPHIValue(Header1, Latch2, phiValue);
+      
         outs() << "Fine fusione\n";
         changed = true;
       }
+
+      DT.recalculate(F);
+      PDT.recalculate(F);
+      LI.releaseMemory();
+      LI.analyze(DT);
 
       if (changed) {
         outs() << "La funzione " << F.getName() << " è stata modificata.\n";
