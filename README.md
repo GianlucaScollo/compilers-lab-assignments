@@ -1,23 +1,43 @@
 # compiles-lab-assignments
-Repository of compiler lab assignments (second part).
+
+**Author:** Benassi Lorenzo (187849), Borghi Emanuele (187264), Scollo Gianluca (187575)
+
+---
+
+## Overview  
+Questo repository contiene i quattro assignment del secondo modulo del corso di Laboratori di Compilatori.
+
+---
 
 ## Repository Structure
 
 ```text
 root/
-├── first_assignment/               # First assignment
-│   ├── SRC/                        # Directory with src files
-│   │   ├── FirstAssignment.cpp
-│   │   └── CMakeLists.txt
-│   └── TEST/                       # Directory with test files
-│       └── ...
-├── second_assignment/               # Second assignment
-├── third_assignment/               # Third assignment
-│   ├── SRC/                        # Directory with src files
-│   │   ├── ThirdAssignment.cpp
-│   │   └── CMakeLists.txt
-│   └── TEST/                       # Directory with test files
-│       └── ...
+├── assignment_1/                   # First assignment: implementazione di 3 passi di ottimizzazione
+│   ├── SRC/                        # Cartella con i file sorgenti
+│   │   ├── CMakeLists.txt
+│   │   └── FirstAssignment.cpp
+│   ├── TEST/                       # Cartella contenente i vari file di test
+│   │   ├── Alg_id_TEST/            # Cartella con i file di test per il passo Algebraic Identity
+│   │   ├── Multi_inst_opt_TEST/    # Cartella con i file di test per il passo Multi-Instruction Optimization
+│   │   └── Str_red_TEST/           # Cartella con i file di test per il passo Strength Reduction
+│   └── README.md
+├── assignment_2/                   # Second assignment: Dataflow Analysis di 3 problemi
+│   └── Dataflow_Analysis.pdf       # File con le analisi
+├── assignment_3/                   # Third assignment: implementazione del Loop-Invariant Code Motion
+│   ├── SRC/                        # Cartella con i file sorgenti
+│   │   ├── CMakeLists.txt
+│   │   └── ThirdAssignment.cpp
+│   ├── TEST/                       # Cartella contenente i vari file di test
+│   │   └── ...
+│   └── README.md
+├── assignment_4/                   # Fourth assignment: implementazione della Loop Fusion
+│   ├── SRC/                        # Cartella con i file sorgenti
+│   │   ├── CMakeLists.txt
+│   │   └── FourthAssignment.cpp
+│   ├── TEST/                       # Cartella contenente i vari file di test
+│   │   └── ...
+│   └── README.md
 ├── .gitignore                      # gitignore file
-└── README.md                       # You are here now!
+└── README.md                       # Attualmente ti trovi qui
 ```
