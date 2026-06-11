@@ -144,6 +144,24 @@ namespace {
     return U1 == U2;
   }
 
+  static const SCEV *translateSCEVToTargetLoop(const SCEV *SourceSCEV, Loop *TargetLoop, ScalarEvolution &SE) {
+    
+    // Controlliamo se l'equazione è un contatore di ciclo (AddRecExpr)
+    if (auto *AddRec = dyn_cast<SCEVAddRecExpr>(SourceSCEV)) {
+        
+        // Creiamo la StoreRewritten: copiamo inizio e passo, ma cambiamo il padrone (TargetLoop)
+        return SE.getAddRecExpr(
+            AddRec->getStart(),
+            AddRec->getStepRecurrence(SE),
+            TargetLoop,
+            AddRec->getNoWrapFlags()
+        );
+    }
+    
+    // Se non è un contatore (es. è un numero fisso come '5'), lo restituiamo così com'è
+    return SourceSCEV;
+}
+  
   // CONDIZIONE 4
   // Non deve esistere un caso in cui L2 accede a un indirizzo "più avanti"
   // rispetto a quello prodotto/aggiornato da L1 alla stessa iterazione,
@@ -177,13 +195,20 @@ namespace {
 
 
     // Usiamo lo stesso scope per confrontare le due espressioni
-    Loop *Scope = L1;
+    //Loop *Scope = L1;
 
     for (Instruction *I1 : MemInstsL1) {
       Value *P1 = getPtrIfLoadOrStore(I1);
       if (!P1) continue;
 
       for (Instruction *I2 : MemInstsL2) {
+        //In caso di read-after-read non ho interesse nel fare controlli
+        //dato che a prescindere non genera conflitti
+        //A noi interessa gestire:
+        //read-after-write, write-after-write e le write-after-read
+        if (isa<LoadInst>(I1) && isa<LoadInst>(I2)) {
+          continue;
+        }
         Value *P2 = getPtrIfLoadOrStore(I2);
         if (!P2) continue;
 
@@ -192,15 +217,17 @@ namespace {
           continue;
 
         // Riscriviamo entrambi i puntatori nello stesso scope
-        const SCEV *S1 = SE.getSCEVAtScope(P1, Scope);
-        const SCEV *S2 = SE.getSCEVAtScope(P2, Scope);
+        const SCEV *S1 = SE.getSCEVAtScope(P1, L1);
+        const SCEV *S2 = SE.getSCEVAtScope(P2, L2);
 
         if (isa<SCEVCouldNotCompute>(S1) || isa<SCEVCouldNotCompute>(S2))
           return false;
 
+        //Prendiamo S2 (che vive in L2) e lo traduciamo in L1
+        const SCEV *S2_Rewritten = translateSCEVToTargetLoop(S2, L1, SE);
         // Differenza tra indirizzi (o offset) nel medesimo scope:
         // Delta = Ptr(L2) - Ptr(L1)
-        const SCEV *Delta = SE.getMinusSCEV(S2, S1);
+        const SCEV *Delta = SE.getMinusSCEV(S2_Rewritten, S1);
 
         // Controllo se Ptr(L2) è "più avanti" (delta > 0) rispetto a Ptr(L1)
         
