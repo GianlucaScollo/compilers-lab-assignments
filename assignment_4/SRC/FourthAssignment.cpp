@@ -325,12 +325,12 @@ namespace {
         outs() << "Fine controllo di equivalenza di control flow di "<< L1 <<" e " << L2 << ": SUPERATO\n";
 
         // Controllo che i due loop non abbiano una NegativeDistanceDeps
-        outs() << "Inizio controllo dipendenze di "<< L1 <<" e " << L2 << "\n";
+        /*outs() << "Inizio controllo dipendenze di "<< L1 <<" e " << L2 << "\n";
         if (!hasNoNegativeDistanceDeps(L1, L2, SE)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " hanno una NegativeDistanceDeps\n";
           continue;
         }
-        outs() << "Fine controllo dipendenze di "<< L1 <<" e " << L2 << ": SUPERATO\n";
+        outs() << "Fine controllo dipendenze di "<< L1 <<" e " << L2 << ": SUPERATO\n";*/
 
         Candidates.push_back({L1, L2, isL1Guarded});
       }
@@ -447,7 +447,7 @@ namespace {
         BasicBlock *Exit1    = L1->getUniqueExitBlock();
         BasicBlock *Exit2    = L2->getUniqueExitBlock();
         
-        if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit2 || !PreHeader2) {
+        if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit2) {
             outs() << "ERRORE nel loop della funzione: " << F.getName() << "\n"; 
             continue;
         }
