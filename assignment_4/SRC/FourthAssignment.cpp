@@ -284,13 +284,13 @@ namespace {
           continue;
         }
 
-        // Se sono guarded, controlliamo anche che abbiano la stessa semantica
+        /* Se sono guarded, controlliamo anche che abbiano la stessa semantica
         outs() << "Inizio controllo della semantica della guardia di "<< L1 <<" e " << L2 << "\n";
         if (isL1Guarded && !haveSameGuardSemantics(L1, L2)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno la stessa guardia\n";
           continue;
         }
-        outs() << "Fine controllo della semantica della guardia di "<< L1 <<" e " << L2 << ": SUPERATO\n";
+        outs() << "Fine controllo della semantica della guardia di "<< L1 <<" e " << L2 << ": SUPERATO\n";*/
 
         // Controllo l'adiacenza dei due loop
         outs() << "Inizio controllo adiacenza di "<< L1 <<" e " << L2 << "\n";
@@ -380,6 +380,12 @@ namespace {
 
   BasicBlock *getBodyEntry(Loop *L) {
     BranchInst *BI = dyn_cast<BranchInst>(L->getHeader()->getTerminator());
+
+    //in tal caso il body è l'header stesso
+    if (BI->isUnconditional()) {
+        return L->getHeader();
+    }
+    
     if (L->contains(BI->getSuccessor(0)))
         return BI->getSuccessor(0);
     return BI->getSuccessor(1); 
@@ -460,6 +466,15 @@ namespace {
         IV2->replaceAllUsesWith(IV1);
         IV2->eraseFromParent();
 
+        //Spostiamo le altre variabili PHI (es. accumulatori) da Header2 a Header1
+        for (PHINode &PN : make_early_inc_range(Header2->phis())) {
+            PN.moveBefore(Header1->getFirstNonPHI());
+            int Preheader2Idx = PN.getBasicBlockIndex(L2->getLoopPreheader());
+            if (Preheader2Idx != -1) {
+                PN.setIncomingBlock(Preheader2Idx, L1->getLoopPreheader());
+            }
+        }
+
         // Header1 false -> Exit2
         Exit2->removePredecessor(Header2);
         Header1->getTerminator()->replaceSuccessorWith(Exit1, Exit2);
@@ -467,6 +482,8 @@ namespace {
         Value* phiValue = getPHIValue(Header1, Latch1);
 
         Latch1->getTerminator()->replaceSuccessorWith(Header1, BodyEntry2);
+        //BodyEntry2 ora aspetta il flusso da Latch1, non più da Header2
+        BodyEntry2->replacePhiUsesWith(Header2, Latch1);
         Latch2->getTerminator()->replaceSuccessorWith(Header2, Header1);
 
         Header1->replacePhiUsesWith(Latch1, Latch2);
@@ -476,10 +493,10 @@ namespace {
         changed = true;
       }
 
-      DT.recalculate(F);
+      /*DT.recalculate(F);
       PDT.recalculate(F);
       LI.releaseMemory();
-      LI.analyze(DT);
+      LI.analyze(DT);*/
 
       if (changed) {
         outs() << "La funzione " << F.getName() << " è stata modificata.\n";
