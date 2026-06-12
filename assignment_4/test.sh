@@ -17,22 +17,28 @@ if [[ ! -d "$TEST_DIR" ]]; then
     exit 1
 fi
 
-# Cerca tutti i file .cpp nella directory TEST
-shopt -s nullglob
-files=("$TEST_DIR"/*.cpp)
+# Cerca tutti i file .cpp nella directory TEST e nelle sue sottocartelle
+mapfile -d '' files < <(find "$TEST_DIR" -type f -name '*.cpp' -print0)
 
 if [[ ${#files[@]} -eq 0 ]]; then
-    echo "Nessun file .cpp trovato in '$TEST_DIR'."
+    echo "Nessun file .cpp trovato in '$TEST_DIR' o nelle sue sottocartelle."
     exit 1
 fi
 
 for filepath in "${files[@]}"; do
     filename="$(basename "$filepath")"          # nomefile.cpp
     base="${filename%.cpp}"                     # nomefile
+    rel_dir="$(dirname "${filepath#$TEST_DIR/}")"
 
-    ll="$TEST_DIR/$base.ll"
-    m2r="$TEST_DIR/$base.m2r.ll"
-    opt_out="$TEST_DIR/$base.optimized.ll"
+    if [[ "$rel_dir" == "." ]]; then
+        out_dir="$TEST_DIR"
+    else
+        out_dir="$TEST_DIR/$rel_dir"
+    fi
+
+    ll="$out_dir/$base.ll"
+    m2r="$out_dir/$base.m2r.ll"
+    opt_out="$out_dir/$base.optimized.ll"
 
     echo "$SEPARATOR" >> "$OUTPUT_FILE"
     echo "FILE: $filename" >> "$OUTPUT_FILE"
