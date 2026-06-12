@@ -16,6 +16,7 @@ int LoopFusion_base(int N) {
   for (int i=0; i < N; i++) {
     A[i] = (i * 3) + 7;
   }
+  
   // L2
   for (int j=0; j < N; j++) {
     B[j] = A[j] + (j ^ 5);
