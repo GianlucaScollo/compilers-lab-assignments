@@ -9,20 +9,21 @@ int LoopFusion_normal_vs_guarded(int N) {
     B[k] = 0; 
   }
 
+  if (N > 64 || N < 0)
+    N = 64;
+
+  int i = 0;
+  
   // Loop 1 unguarded
-  for (int i = 0; i < N; ++i) {
+  do {
     A[i] = A[i] * 2 + 1;
-  }
+    i++;
+  } while (i < N);
 
   // Loop 2 guarded (solo se N > 0)
-  if (N > 0) {
-    for (int i = 0; i < N; ++i) {
-      B[i] = A[i] + 10;
-    }
+  for (int i = 0; i < N; ++i) {
+    B[i] = A[i] + 10;
   }
 
-  if (N > 0) {
-    return B[N-1];
-  }
-  return 0;
+  return B[N-1];
 }

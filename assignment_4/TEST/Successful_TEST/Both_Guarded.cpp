@@ -9,22 +9,18 @@ int LoopFusion_both_guarded(int N) {
     B[k] = 0; 
   }
 
-  // Loop 1 guarded (solo se N > 0)
-  if (N > 0) {
-    for (int i = 0; i < N; ++i) {
-      A[i] = (i + 2) * (i + 2);
-    }
+  if (N > 64 || N < 0)
+    N = 64;
+
+  // Loop 1 guarded
+  for (int i = 0; i < N; ++i) {
+    A[i] = (i + 2) * (i + 2);
   }
 
-  // Loop 2 guarded (solo se N > 0)
-  if (N > 0) {
-    for (int i = 0; i < N; ++i) {
-      B[i] = A[i] + (N - i);
-    }
+  // Loop 2 guarded
+  for (int i = 0; i < N; ++i) {
+    B[i] = A[i] + (N - i);
   }
 
-  if (N > 0) {
-    return B[N-1];
-  }
-  return 0;
+  return B[N-1];
 }

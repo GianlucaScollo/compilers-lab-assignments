@@ -9,10 +9,9 @@ In questo assignment è stato implementato il passo di ottimizzazione della Loop
 Non tutti i loop si possono fondere bisogna che siano rispettate le seguenti condizioni:
 1. **Adiacenza**  
     - I due loop devono essere adiacenti tra di loro, non ci devono essere istruzioni in mezzo (cioè tra la fine del primo loop e l'inizio del secondo loop)
-    - (extra): I due loop devono avere la stessa semantica quindi entrambi guarded oppure entrambi unguarded
+    - I due loop devono avere la stessa semantica quindi entrambi guarded oppure entrambi unguarded
 2. **Stesso numero di iterazioni**  
     - Bisogna controllare che entrambi i loop facciano lo stesso numero di iterazioni
-    - (extra): I due loop devono avere lo stess step di incrmento/decremento
 3. **Equivalenza del Control Flow**  
     - Bisogna controllare la dominanza e la post dominanza dei due loop
 4. **Nessuna dipendenza negativa**  
