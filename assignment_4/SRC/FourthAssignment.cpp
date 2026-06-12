@@ -441,6 +441,8 @@ namespace {
         Loop *L1 = P.L1;
         Loop *L2 = P.L2;
         
+        // GetHeader under the hood accede al primo blocco del loop qualunque esso sia, 
+        // di conseguenza se il loop è rotated restituirà il primo blocco del body
         BasicBlock *Header1  = L1->getHeader();
         BasicBlock *Header2  = L2->getHeader();
 
@@ -475,28 +477,31 @@ namespace {
             }
         }
 
-        // Header1 false -> Exit2
+        // Header2 non punta più ad Exit2
         Exit2->removePredecessor(Header2);
+
+        // La branch che, in caso di condizione del loop falsa, portava al blocco Exit1 ora porta ad Exit2
         Header1->getTerminator()->replaceSuccessorWith(Exit1, Exit2);
         
+        // Conservo il valore che assume il phi node quando il flusso arriva da Latch1
         Value* phiValue = getPHIValue(Header1, Latch1);
 
+        // Il Latch1 prima riportava all'Header1, ora porta al primo blocco del body di L2 per eseguire le istruzioni di quest'ultimo
         Latch1->getTerminator()->replaceSuccessorWith(Header1, BodyEntry2);
+
         //BodyEntry2 ora aspetta il flusso da Latch1, non più da Header2
         BodyEntry2->replacePhiUsesWith(Header2, Latch1);
+
+        // Latch2 punta ora a Header1 invece che a Header2, diventando così il nuovo latch di L1
         Latch2->getTerminator()->replaceSuccessorWith(Header2, Header1);
 
+        // Header1 aspetta il flusso da Latch2, non più da Latch1
         Header1->replacePhiUsesWith(Latch1, Latch2);
         setPHIValue(Header1, Latch2, phiValue);
       
         outs() << "Fine fusione\n";
         changed = true;
       }
-
-      /*DT.recalculate(F);
-      PDT.recalculate(F);
-      LI.releaseMemory();
-      LI.analyze(DT);*/
 
       if (changed) {
         outs() << "La funzione " << F.getName() << " è stata modificata.\n";
