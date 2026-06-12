@@ -1,0 +1,140 @@
+============================================================
+FILE: L2_Has_More_Exit_Blocks.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+Inizio controllo adiacenza di 0x563dbefd63b0 e 0x563dbefd6448
+ERRORE: Il loop 0x563dbefd63b0 ed il loop 0x563dbefd6448 non sono adiacenti
+Inizio controllo adiacenza di 0x563dbefd63b0 e 0x563dbefd64e0
+ERRORE: Il loop 0x563dbefd63b0 ed il loop 0x563dbefd64e0 non sono adiacenti
+Inizio controllo adiacenza di 0x563dbefd6448 e 0x563dbefd63b0
+Fine controllo adiacenza di 0x563dbefd6448 e 0x563dbefd63b0: SUPERATO
+Inizio controllo trip count di 0x563dbefd6448 e 0x563dbefd63b0
+ERRORE: Il loop 0x563dbefd6448 ed il loop 0x563dbefd63b0 non hanno lo stesso numero di iterazioni
+Inizio controllo adiacenza di 0x563dbefd6448 e 0x563dbefd64e0
+ERRORE: Il loop 0x563dbefd6448 ed il loop 0x563dbefd64e0 non sono adiacenti
+Inizio controllo adiacenza di 0x563dbefd64e0 e 0x563dbefd63b0
+ERRORE: Il loop 0x563dbefd64e0 ed il loop 0x563dbefd63b0 non sono adiacenti
+Inizio controllo adiacenza di 0x563dbefd64e0 e 0x563dbefd6448
+ERRORE: Il loop 0x563dbefd64e0 ed il loop 0x563dbefd6448 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] L2_Has_More_Exit_Blocks.cpp processato con successo
+============================================================
+FILE: Negative_Deps.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+Inizio controllo adiacenza di 0x558e039f2600 e 0x558e039f2698
+ERRORE: Il loop 0x558e039f2600 ed il loop 0x558e039f2698 non sono adiacenti
+Inizio controllo adiacenza di 0x558e039f2600 e 0x558e039f2730
+ERRORE: Il loop 0x558e039f2600 ed il loop 0x558e039f2730 non sono adiacenti
+Inizio controllo adiacenza di 0x558e039f2698 e 0x558e039f2600
+Fine controllo adiacenza di 0x558e039f2698 e 0x558e039f2600: SUPERATO
+Inizio controllo trip count di 0x558e039f2698 e 0x558e039f2600
+Fine controllo adiacenza di 0x558e039f2698 e 0x558e039f2600: SUPERATO
+Inizio controllo di equivalenza di control flow di 0x558e039f2698 e 0x558e039f2600
+Fine controllo di equivalenza di control flow di 0x558e039f2698 e 0x558e039f2600: SUPERATO
+Inizio controllo dipendenze di 0x558e039f2698 e 0x558e039f2600
+ERRORE: Il loop 0x558e039f2698 ed il loop 0x558e039f2600 hanno una NegativeDistanceDeps
+Inizio controllo adiacenza di 0x558e039f2698 e 0x558e039f2730
+ERRORE: Il loop 0x558e039f2698 ed il loop 0x558e039f2730 non sono adiacenti
+Inizio controllo adiacenza di 0x558e039f2730 e 0x558e039f2600
+ERRORE: Il loop 0x558e039f2730 ed il loop 0x558e039f2600 non sono adiacenti
+Inizio controllo adiacenza di 0x558e039f2730 e 0x558e039f2698
+ERRORE: Il loop 0x558e039f2730 ed il loop 0x558e039f2698 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Negative_Deps.cpp processato con successo
+============================================================
+FILE: Normal_vs_Guarded.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+Inizio controllo adiacenza di 0x559edf4ed0f0 e 0x559edf4ed188
+ERRORE: Il loop 0x559edf4ed0f0 ed il loop 0x559edf4ed188 non sono adiacenti
+Inizio controllo adiacenza di 0x559edf4ed0f0 e 0x559edf4ed220
+ERRORE: Il loop 0x559edf4ed0f0 ed il loop 0x559edf4ed220 non sono adiacenti
+Inizio controllo adiacenza di 0x559edf4ed188 e 0x559edf4ed0f0
+Fine controllo adiacenza di 0x559edf4ed188 e 0x559edf4ed0f0: SUPERATO
+Inizio controllo trip count di 0x559edf4ed188 e 0x559edf4ed0f0
+ERRORE: Il loop 0x559edf4ed188 ed il loop 0x559edf4ed0f0 non hanno lo stesso numero di iterazioni
+Inizio controllo adiacenza di 0x559edf4ed188 e 0x559edf4ed220
+ERRORE: Il loop 0x559edf4ed188 ed il loop 0x559edf4ed220 non sono adiacenti
+Inizio controllo adiacenza di 0x559edf4ed220 e 0x559edf4ed0f0
+ERRORE: Il loop 0x559edf4ed220 ed il loop 0x559edf4ed0f0 non sono adiacenti
+Inizio controllo adiacenza di 0x559edf4ed220 e 0x559edf4ed188
+ERRORE: Il loop 0x559edf4ed220 ed il loop 0x559edf4ed188 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Normal_vs_Guarded.cpp processato con successo
+============================================================
+FILE: Not_Adjacent.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+Inizio controllo adiacenza di 0x55a8eeb0c080 e 0x55a8eeb0c118
+ERRORE: Il loop 0x55a8eeb0c080 ed il loop 0x55a8eeb0c118 non sono adiacenti
+Inizio controllo adiacenza di 0x55a8eeb0c080 e 0x55a8eeb0c1b0
+ERRORE: Il loop 0x55a8eeb0c080 ed il loop 0x55a8eeb0c1b0 non sono adiacenti
+Inizio controllo adiacenza di 0x55a8eeb0c118 e 0x55a8eeb0c080
+Fine controllo adiacenza di 0x55a8eeb0c118 e 0x55a8eeb0c080: SUPERATO
+Inizio controllo trip count di 0x55a8eeb0c118 e 0x55a8eeb0c080
+Fine controllo adiacenza di 0x55a8eeb0c118 e 0x55a8eeb0c080: SUPERATO
+Inizio controllo di equivalenza di control flow di 0x55a8eeb0c118 e 0x55a8eeb0c080
+Fine controllo di equivalenza di control flow di 0x55a8eeb0c118 e 0x55a8eeb0c080: SUPERATO
+Inizio controllo dipendenze di 0x55a8eeb0c118 e 0x55a8eeb0c080
+Fine controllo dipendenze di 0x55a8eeb0c118 e 0x55a8eeb0c080: SUPERATO
+Inizio controllo adiacenza di 0x55a8eeb0c118 e 0x55a8eeb0c1b0
+ERRORE: Il loop 0x55a8eeb0c118 ed il loop 0x55a8eeb0c1b0 non sono adiacenti
+Inizio controllo adiacenza di 0x55a8eeb0c1b0 e 0x55a8eeb0c080
+ERRORE: Il loop 0x55a8eeb0c1b0 ed il loop 0x55a8eeb0c080 non sono adiacenti
+Inizio controllo adiacenza di 0x55a8eeb0c1b0 e 0x55a8eeb0c118
+ERRORE: Il loop 0x55a8eeb0c1b0 ed il loop 0x55a8eeb0c118 non sono adiacenti
+Fine ricerca candidati alla fusione
+Candidati trovati: inizio fusione
+Fine fusione
+La funzione _Z15LoopFusion_basei è stata modificata.
+[OK] Not_Adjacent.cpp processato con successo
+============================================================
+FILE: Not_Same_Iteration_Number.cpp
+============================================================
+--- clang ---
+./TEST/Edges_TEST/Not_Same_Iteration_Number.cpp:21:13: error: array subscript is not an integer
+   21 |     B[j] = A[std::ceil(j/2)] + (j ^ 5);
+      |             ^~~~~~~~~~~~~~~
+1 error generated.
+[ERRORE] clang fallito per Not_Same_Iteration_Number.cpp
+============================================================
+FILE: Not_Same_Step.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+Inizio controllo adiacenza di 0x55bc2e1480c0 e 0x55bc2e148158
+ERRORE: Il loop 0x55bc2e1480c0 ed il loop 0x55bc2e148158 non sono adiacenti
+Inizio controllo adiacenza di 0x55bc2e1480c0 e 0x55bc2e1481f0
+ERRORE: Il loop 0x55bc2e1480c0 ed il loop 0x55bc2e1481f0 non sono adiacenti
+Inizio controllo adiacenza di 0x55bc2e148158 e 0x55bc2e1480c0
+Fine controllo adiacenza di 0x55bc2e148158 e 0x55bc2e1480c0: SUPERATO
+Inizio controllo trip count di 0x55bc2e148158 e 0x55bc2e1480c0
+ERRORE: Il loop 0x55bc2e148158 ed il loop 0x55bc2e1480c0 non hanno lo stesso numero di iterazioni
+Inizio controllo adiacenza di 0x55bc2e148158 e 0x55bc2e1481f0
+ERRORE: Il loop 0x55bc2e148158 ed il loop 0x55bc2e1481f0 non sono adiacenti
+Inizio controllo adiacenza di 0x55bc2e1481f0 e 0x55bc2e1480c0
+ERRORE: Il loop 0x55bc2e1481f0 ed il loop 0x55bc2e1480c0 non sono adiacenti
+Inizio controllo adiacenza di 0x55bc2e1481f0 e 0x55bc2e148158
+ERRORE: Il loop 0x55bc2e1481f0 ed il loop 0x55bc2e148158 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Not_Same_Step.cpp processato con successo
+============================================================

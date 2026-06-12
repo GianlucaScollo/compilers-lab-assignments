@@ -19,6 +19,13 @@ Non tutti i loop si possono fondere bisogna che siano rispettate le seguenti con
 
 Una volta effettuati questi accertamenti per i due loop, presi in considerazione, si può passare a fare la fusione 
 
+## Testing
+
+Per testare i passi di ottimizzazione si può eseguire lo script test.sh a cui si devono passare come argomenti:
+1. Directory in cui sono contenuti i file .cpp e/o .ll
+2. Directory in cui è contenuto il file .so del passo
+3. Nome del file su cui salvare l'output del passo per ogni file su cui viene eseguito
+
 ---
 
 ## Directory Structure
