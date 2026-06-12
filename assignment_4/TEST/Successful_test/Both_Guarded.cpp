@@ -3,8 +3,11 @@ int LoopFusion_both_guarded(int N) {
   int A[64];
   int B[64];
 
-  // inizializzazione dei due array
-  for (int k = 0; k < 64; ++k) { A[k] = k; B[k] = 0; }
+  // Inizializzazione dei due array
+  for (int k = 0; k < 64; ++k) { 
+    A[k] = 0; 
+    B[k] = 0; 
+  }
 
   // Loop 1 guarded (solo se N > 0)
   if (N > 0) {
