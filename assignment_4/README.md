@@ -25,4 +25,6 @@ Una volta effettuati questi accertamenti per i due loop, presi in considerazione
 ## Directory Structure
 
 - La cartella `SRC/`: contiene i file dell'implementazione del passo.
-- La cartella `TEST/`: contiene i file di test.
+- La cartella `TEST/`: contiene i file di test. E' suddivisa in:
+    - `TEST/Edges_test/`: al suo interno ci sono i file di test che non passano tutti i controlli
+    - `TEST/Successful_test/`: al suo interno ci sono i file di test che passano tutti i controlli
