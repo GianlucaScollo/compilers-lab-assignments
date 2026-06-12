@@ -15,8 +15,9 @@ In questo assignment sono stati implementati 3 passi di ottimizzazione LLVM:
 
 2. **Strength Reduction** 
     - Sostituzione di operazioni costose con operazioni equivalenti più efficienti:  
-        - `15 × 𝑥 ⇒ (𝑥 ≪ 4) – 𝑥`  
-        - `𝑦 = 𝑥 / 8 ⇒ 𝑦 = 𝑥 >> 3`  
+        - `15 × 𝑥 ⇒ (𝑥 << 4) – 𝑥`  
+        - `𝑦 = 𝑥 / 8 ⇒ 𝑦 = 𝑥 >> 3`
+        - `(extra): -3 × 𝑥 ⇒ x - (𝑥 << 2)`
 
 3. **Multi-Instruction Optimization**  
     - Ottimizzazione di sequenze di istruzioni ridondanti:  
