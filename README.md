@@ -36,8 +36,8 @@ root/
 │   │   ├── CMakeLists.txt
 │   │   └── FourthAssignment.cpp
 │   ├── TEST/                       # Cartella contenente i vari file di test
-│   │   ├── Edges_test/             # Cartella con i file di test che non passano tutti i controlli
-│   │   └── Successful_test/        # Cartella con i file di test che passano tutti i controlli
+│   │   ├── Edges_TEST/             # Cartella con i file di test che non passano tutti i controlli
+│   │   └── Successful_TEST/        # Cartella con i file di test che passano tutti i controlli
 │   └── README.md
 ├── .gitignore                      # gitignore file
 └── README.md                       # Attualmente ti trovi qui

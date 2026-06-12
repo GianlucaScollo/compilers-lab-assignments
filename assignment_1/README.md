@@ -28,4 +28,7 @@ In questo assignment sono stati implementati 3 passi di ottimizzazione LLVM:
 ## Directory Structure
 
 - La cartella `SRC/`: contiene i file dell'iimplementazione dei passi.
-- La cartella `TEST/`: contiene i file di test per le varie ottimizzazioni.
+- La cartella `TEST/`: contiene i file di test per le varie ottimizzazioni. E' suddivisa in:
+    - `TEST/Alg_id_TEST/`: al suo interno ci sono i file di test per il passo Algebraic Identity
+    - `TEST/Multi_inst_opt_TEST/`: al suo interno ci sono i file di test per il passo Multi-Instruction Optimization
+    - `TEST/Str_red_TEST/`: al suo interno ci sono i file di test per il passo Strength Reduction
