@@ -18,7 +18,7 @@ using namespace llvm;
 namespace {
 
 
-  //Vincolo 1: È Loop Invariant?
+  // Vincolo 1: È Loop Invariant?
   bool isLoopInvariant(Instruction &I, Loop *L) {
       for (Value *Operand : I.operands()) {
           //Use &U
@@ -28,16 +28,19 @@ namespace {
           
           if (Instruction *InstOp = dyn_cast<Instruction>(Operand)) {
               if (!L->contains(InstOp)) continue; // Definita fuori dal loop
+              
               return false; // Definita dentro il loop, non è invariante
-              //ipotizziamo che le istruzione vengano scansionate in ordine sequenziale
-              //di conseguenza se un istruzione ha come operando un'altra istruzione che è definita dentro il loop sicuramente l'operando è associato un'altra istruzione che non è loop invariant
-
+              
+              // ipotizziamo che le istruzioni vengano scansionate in ordine sequenziale
+              // di conseguenza se un istruzione ha come operando un'altra istruzione che 
+              // è definita dentro il loop sicuramente l'operando è associato un'altra 
+              // istruzione che non è loop invariant
           }
       }
       return true; 
   }
 
-  // 2. Vincolo 2: Il blocco domina tutte le uscite?
+  // Vincolo 2: Il blocco domina tutte le uscite?
   bool dominatesAllExits(Instruction &I, Loop *L, DominatorTree &DT) {
       BasicBlock *InstBB = I.getParent();
       SmallVector<BasicBlock *, 4> ExitBlocks;
@@ -51,7 +54,7 @@ namespace {
       return true;
   }
 
-  // 3. La funzione principale che verifica se un'istruzione è candidata al LICM
+  // La funzione principale che verifica se un'istruzione è candidata al LICM
   bool isCandidateForCodeMotion(Instruction &I, Loop *L, DominatorTree &DT) {
       // Escludiamo istruzioni di salto, chiamate a funzione, e operazioni di memoria 
       // (perché la memoria non rispetta le regole SSA )
@@ -69,15 +72,24 @@ namespace {
           return false;
       }
 
-      // Vincolo 3 e 4: Automaticamente superati in LLVM grazie alla forma SSA!
-      // Vincolo 3: Usando SSA è escluso a livello di rappresentazione che più di un'istruzione possa ridefinire la stessa variabile.
-      // Vincolo 4: è da escludere che una definizione non domini tutti i suoi usi, dato che in SSA ogni variabile è definita una sola volta e ogni uso è dominato dalla definizione. (c'è una singa reaching definition)
+      // I vincoli 3 e 4 sono automaticamente superati in LLVM grazie alla forma SSA!
+      
+      // Vincolo 3: Usando SSA è escluso a livello di rappresentazione che più di un'istruzione 
+      // possa ridefinire la stessa variabile.
+      
+      // Vincolo 4: è da escludere che una definizione non domini tutti i suoi usi, dato che in 
+      // SSA ogni variabile è definita una sola volta e ogni uso è dominato dalla definizione. 
+      // (c'è una singa reaching definition)
+      
       // In linea teorica, anche il vincolo sulla dominanza delle uscite sarebbe rilassabile 
-      // dato che non andrebbe in ogni caso a uccidere altre reaching definitions (portarlo fuori introdurrebbe del death code nel peggior caso) ma è comunque buona pratica applicarlo qualora fossero eventualmente presenti
-      //istruzioni semanticamente sbagliate come divisioni per zero.
+      // dato che non andrebbe in ogni caso a uccidere altre reaching definitions 
+      // (portarlo fuori introdurrebbe del death code nel peggior caso) ma è comunque 
+      // buona pratica applicarlo qualora fossero eventualmente presenti
+      // istruzioni semanticamente sbagliate come divisioni per zero.
       
       return true;
   }
+
   // LICM implementation
   struct LoopInvariantCodeMotion: PassInfoMixin<LoopInvariantCodeMotion> {
     // Main entry point, takes IR unit to run the pass on (&F) and the
@@ -107,7 +119,6 @@ namespace {
               
               for (BasicBlock *BB : L->getBlocks()) {
                   for (Instruction &I : llvm::make_early_inc_range(*BB)) {
-                      
                       if (isCandidateForCodeMotion(I, L, DT)) {
                           errs() << "Sposto l'istruzione: " << I << "\n";
                           I.moveBefore(PreheaderTerminator);
