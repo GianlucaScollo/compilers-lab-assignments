@@ -1,0 +1,440 @@
+============================================================
+FILE: Base.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561dbef390b0 e 0x561dbef39148
+Fine controllo della semantica della guardia di 0x561dbef390b0 e 0x561dbef39148: SUPERATO
+Inizio controllo adiacenza di 0x561dbef390b0 e 0x561dbef39148
+ERRORE: Il loop 0x561dbef390b0 ed il loop 0x561dbef39148 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561dbef390b0 e 0x561dbef391e0
+Fine controllo della semantica della guardia di 0x561dbef390b0 e 0x561dbef391e0: SUPERATO
+Inizio controllo adiacenza di 0x561dbef390b0 e 0x561dbef391e0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x561dbef390b0 ed il loop 0x561dbef391e0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561dbef39148 e 0x561dbef390b0
+Fine controllo della semantica della guardia di 0x561dbef39148 e 0x561dbef390b0: SUPERATO
+Inizio controllo adiacenza di 0x561dbef39148 e 0x561dbef390b0
+Fine controllo adiacenza di 0x561dbef39148 e 0x561dbef390b0: SUPERATO
+Inizio controllo trip count di 0x561dbef39148 e 0x561dbef390b0
+Fine controllo adiacenza di 0x561dbef39148 e 0x561dbef390b0: SUPERATO
+Inizio controllo di equivalenza di control flow di 0x561dbef39148 e 0x561dbef390b0
+Fine controllo di equivalenza di control flow di 0x561dbef39148 e 0x561dbef390b0: SUPERATO
+Inizio controllo dipendenze di 0x561dbef39148 e 0x561dbef390b0
+Fine controllo dipendenze di 0x561dbef39148 e 0x561dbef390b0: SUPERATO
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561dbef39148 e 0x561dbef391e0
+Fine controllo della semantica della guardia di 0x561dbef39148 e 0x561dbef391e0: SUPERATO
+Inizio controllo adiacenza di 0x561dbef39148 e 0x561dbef391e0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x561dbef39148 ed il loop 0x561dbef391e0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561dbef391e0 e 0x561dbef390b0
+Fine controllo della semantica della guardia di 0x561dbef391e0 e 0x561dbef390b0: SUPERATO
+Inizio controllo adiacenza di 0x561dbef391e0 e 0x561dbef390b0
+ERRORE: Il loop 0x561dbef391e0 ed il loop 0x561dbef390b0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561dbef391e0 e 0x561dbef39148
+Fine controllo della semantica della guardia di 0x561dbef391e0 e 0x561dbef39148: SUPERATO
+Inizio controllo adiacenza di 0x561dbef391e0 e 0x561dbef39148
+ERRORE: Il loop 0x561dbef391e0 ed il loop 0x561dbef39148 non sono adiacenti
+Fine ricerca candidati alla fusione
+Candidati trovati: inizio fusione
+Fine fusione
+La funzione _Z23LoopFusion_both_guardedi è stata modificata.
+[OK] Base.cpp processato con successo
+============================================================
+FILE: Both_Guarded.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 1 L2 guarded: 1
+Inizio controllo della semantica della guardia di 0x5612434653d8 e 0x561243465340
+ERRORE: Il loop 0x5612434653d8 ed il loop 0x561243465340 non hanno la stessa guardia
+L1 guarded: 1 L2 guarded: 1
+Inizio controllo della semantica della guardia di 0x561243465340 e 0x5612434653d8
+ERRORE: Il loop 0x561243465340 ed il loop 0x5612434653d8 non hanno la stessa guardia
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Both_Guarded.cpp processato con successo
+============================================================
+FILE: Rotated.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x557382fffe70 e 0x557382ffff08
+Fine controllo della semantica della guardia di 0x557382fffe70 e 0x557382ffff08: SUPERATO
+Inizio controllo adiacenza di 0x557382fffe70 e 0x557382ffff08
+ERRORE: Il loop 0x557382fffe70 ed il loop 0x557382ffff08 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x557382fffe70 e 0x557382ffffa0
+Fine controllo della semantica della guardia di 0x557382fffe70 e 0x557382ffffa0: SUPERATO
+Inizio controllo adiacenza di 0x557382fffe70 e 0x557382ffffa0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x557382fffe70 ed il loop 0x557382ffffa0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x557382ffff08 e 0x557382fffe70
+Fine controllo della semantica della guardia di 0x557382ffff08 e 0x557382fffe70: SUPERATO
+Inizio controllo adiacenza di 0x557382ffff08 e 0x557382fffe70
+Fine controllo adiacenza di 0x557382ffff08 e 0x557382fffe70: SUPERATO
+Inizio controllo trip count di 0x557382ffff08 e 0x557382fffe70
+Fine controllo adiacenza di 0x557382ffff08 e 0x557382fffe70: SUPERATO
+Inizio controllo di equivalenza di control flow di 0x557382ffff08 e 0x557382fffe70
+Fine controllo di equivalenza di control flow di 0x557382ffff08 e 0x557382fffe70: SUPERATO
+Inizio controllo dipendenze di 0x557382ffff08 e 0x557382fffe70
+Fine controllo dipendenze di 0x557382ffff08 e 0x557382fffe70: SUPERATO
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x557382ffff08 e 0x557382ffffa0
+Fine controllo della semantica della guardia di 0x557382ffff08 e 0x557382ffffa0: SUPERATO
+Inizio controllo adiacenza di 0x557382ffff08 e 0x557382ffffa0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x557382ffff08 ed il loop 0x557382ffffa0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x557382ffffa0 e 0x557382fffe70
+Fine controllo della semantica della guardia di 0x557382ffffa0 e 0x557382fffe70: SUPERATO
+Inizio controllo adiacenza di 0x557382ffffa0 e 0x557382fffe70
+ERRORE: Il loop 0x557382ffffa0 ed il loop 0x557382fffe70 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x557382ffffa0 e 0x557382ffff08
+Fine controllo della semantica della guardia di 0x557382ffffa0 e 0x557382ffff08: SUPERATO
+Inizio controllo adiacenza di 0x557382ffffa0 e 0x557382ffff08
+ERRORE: Il loop 0x557382ffffa0 ed il loop 0x557382ffff08 non sono adiacenti
+Fine ricerca candidati alla fusione
+Candidati trovati: inizio fusione
+Fine fusione
+La funzione _Z15LoopFusion_basei è stata modificata.
+[OK] Rotated.cpp processato con successo
+============================================================
+FILE: Nested.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55f1b3cc26f0 e 0x55f1b3cc2788
+Fine controllo della semantica della guardia di 0x55f1b3cc26f0 e 0x55f1b3cc2788: SUPERATO
+Inizio controllo adiacenza di 0x55f1b3cc26f0 e 0x55f1b3cc2788
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x55f1b3cc26f0 ed il loop 0x55f1b3cc2788 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55f1b3cc2788 e 0x55f1b3cc26f0
+Fine controllo della semantica della guardia di 0x55f1b3cc2788 e 0x55f1b3cc26f0: SUPERATO
+Inizio controllo adiacenza di 0x55f1b3cc2788 e 0x55f1b3cc26f0
+ERRORE: Il loop 0x55f1b3cc2788 ed il loop 0x55f1b3cc26f0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55f1b3cc2658 e 0x55f1b3cc25c0
+Fine controllo della semantica della guardia di 0x55f1b3cc2658 e 0x55f1b3cc25c0: SUPERATO
+Inizio controllo adiacenza di 0x55f1b3cc2658 e 0x55f1b3cc25c0
+Fine controllo adiacenza di 0x55f1b3cc2658 e 0x55f1b3cc25c0: SUPERATO
+Inizio controllo trip count di 0x55f1b3cc2658 e 0x55f1b3cc25c0
+Fine controllo adiacenza di 0x55f1b3cc2658 e 0x55f1b3cc25c0: SUPERATO
+Inizio controllo di equivalenza di control flow di 0x55f1b3cc2658 e 0x55f1b3cc25c0
+Fine controllo di equivalenza di control flow di 0x55f1b3cc2658 e 0x55f1b3cc25c0: SUPERATO
+Inizio controllo dipendenze di 0x55f1b3cc2658 e 0x55f1b3cc25c0
+Fine controllo dipendenze di 0x55f1b3cc2658 e 0x55f1b3cc25c0: SUPERATO
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55f1b3cc25c0 e 0x55f1b3cc2658
+Fine controllo della semantica della guardia di 0x55f1b3cc25c0 e 0x55f1b3cc2658: SUPERATO
+Inizio controllo adiacenza di 0x55f1b3cc25c0 e 0x55f1b3cc2658
+ERRORE: Il loop 0x55f1b3cc25c0 ed il loop 0x55f1b3cc2658 non sono adiacenti
+Fine ricerca candidati alla fusione
+Candidati trovati: inizio fusione
+Fine fusione
+La funzione _Z17LoopFusion_nestedi è stata modificata.
+[OK] Nested.cpp processato con successo
+============================================================
+FILE: Not_Adjacent.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55e453ecd7a0 e 0x55e453ecd838
+Fine controllo della semantica della guardia di 0x55e453ecd7a0 e 0x55e453ecd838: SUPERATO
+Inizio controllo adiacenza di 0x55e453ecd7a0 e 0x55e453ecd838
+ERRORE: Il loop 0x55e453ecd7a0 ed il loop 0x55e453ecd838 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55e453ecd7a0 e 0x55e453ecd8d0
+Fine controllo della semantica della guardia di 0x55e453ecd7a0 e 0x55e453ecd8d0: SUPERATO
+Inizio controllo adiacenza di 0x55e453ecd7a0 e 0x55e453ecd8d0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x55e453ecd7a0 ed il loop 0x55e453ecd8d0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55e453ecd838 e 0x55e453ecd7a0
+Fine controllo della semantica della guardia di 0x55e453ecd838 e 0x55e453ecd7a0: SUPERATO
+Inizio controllo adiacenza di 0x55e453ecd838 e 0x55e453ecd7a0
+ERRORE: Il loop 0x55e453ecd838 ed il loop 0x55e453ecd7a0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55e453ecd838 e 0x55e453ecd8d0
+Fine controllo della semantica della guardia di 0x55e453ecd838 e 0x55e453ecd8d0: SUPERATO
+Inizio controllo adiacenza di 0x55e453ecd838 e 0x55e453ecd8d0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x55e453ecd838 ed il loop 0x55e453ecd8d0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55e453ecd8d0 e 0x55e453ecd7a0
+Fine controllo della semantica della guardia di 0x55e453ecd8d0 e 0x55e453ecd7a0: SUPERATO
+Inizio controllo adiacenza di 0x55e453ecd8d0 e 0x55e453ecd7a0
+ERRORE: Il loop 0x55e453ecd8d0 ed il loop 0x55e453ecd7a0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55e453ecd8d0 e 0x55e453ecd838
+Fine controllo della semantica della guardia di 0x55e453ecd8d0 e 0x55e453ecd838: SUPERATO
+Inizio controllo adiacenza di 0x55e453ecd8d0 e 0x55e453ecd838
+ERRORE: Il loop 0x55e453ecd8d0 ed il loop 0x55e453ecd838 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Not_Adjacent.cpp processato con successo
+============================================================
+FILE: Not_Same_Iteration_Number.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddeab0 e 0x55d371ddeb48
+Fine controllo della semantica della guardia di 0x55d371ddeab0 e 0x55d371ddeb48: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddeab0 e 0x55d371ddeb48
+ERRORE: Il loop 0x55d371ddeab0 ed il loop 0x55d371ddeb48 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddeab0 e 0x55d371ddebe0
+Fine controllo della semantica della guardia di 0x55d371ddeab0 e 0x55d371ddebe0: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddeab0 e 0x55d371ddebe0
+ERRORE: Il loop 0x55d371ddeab0 ed il loop 0x55d371ddebe0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddeab0 e 0x55d371ddec78
+Fine controllo della semantica della guardia di 0x55d371ddeab0 e 0x55d371ddec78: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddeab0 e 0x55d371ddec78
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x55d371ddeab0 ed il loop 0x55d371ddec78 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddeb48 e 0x55d371ddeab0
+Fine controllo della semantica della guardia di 0x55d371ddeb48 e 0x55d371ddeab0: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddeb48 e 0x55d371ddeab0
+Fine controllo adiacenza di 0x55d371ddeb48 e 0x55d371ddeab0: SUPERATO
+Inizio controllo trip count di 0x55d371ddeb48 e 0x55d371ddeab0
+ERRORE: Il loop 0x55d371ddeb48 ed il loop 0x55d371ddeab0 non hanno lo stesso numero di iterazioni
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddeb48 e 0x55d371ddebe0
+Fine controllo della semantica della guardia di 0x55d371ddeb48 e 0x55d371ddebe0: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddeb48 e 0x55d371ddebe0
+ERRORE: Il loop 0x55d371ddeb48 ed il loop 0x55d371ddebe0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddeb48 e 0x55d371ddec78
+Fine controllo della semantica della guardia di 0x55d371ddeb48 e 0x55d371ddec78: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddeb48 e 0x55d371ddec78
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x55d371ddeb48 ed il loop 0x55d371ddec78 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddebe0 e 0x55d371ddeab0
+Fine controllo della semantica della guardia di 0x55d371ddebe0 e 0x55d371ddeab0: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddebe0 e 0x55d371ddeab0
+ERRORE: Il loop 0x55d371ddebe0 ed il loop 0x55d371ddeab0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddebe0 e 0x55d371ddeb48
+Fine controllo della semantica della guardia di 0x55d371ddebe0 e 0x55d371ddeb48: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddebe0 e 0x55d371ddeb48
+ERRORE: Il loop 0x55d371ddebe0 ed il loop 0x55d371ddeb48 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddebe0 e 0x55d371ddec78
+Fine controllo della semantica della guardia di 0x55d371ddebe0 e 0x55d371ddec78: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddebe0 e 0x55d371ddec78
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x55d371ddebe0 ed il loop 0x55d371ddec78 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddec78 e 0x55d371ddeab0
+Fine controllo della semantica della guardia di 0x55d371ddec78 e 0x55d371ddeab0: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddec78 e 0x55d371ddeab0
+ERRORE: Il loop 0x55d371ddec78 ed il loop 0x55d371ddeab0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddec78 e 0x55d371ddeb48
+Fine controllo della semantica della guardia di 0x55d371ddec78 e 0x55d371ddeb48: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddec78 e 0x55d371ddeb48
+ERRORE: Il loop 0x55d371ddec78 ed il loop 0x55d371ddeb48 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55d371ddec78 e 0x55d371ddebe0
+Fine controllo della semantica della guardia di 0x55d371ddec78 e 0x55d371ddebe0: SUPERATO
+Inizio controllo adiacenza di 0x55d371ddec78 e 0x55d371ddebe0
+Fine controllo adiacenza di 0x55d371ddec78 e 0x55d371ddebe0: SUPERATO
+Inizio controllo trip count di 0x55d371ddec78 e 0x55d371ddebe0
+ERRORE: Il loop 0x55d371ddec78 ed il loop 0x55d371ddebe0 non hanno lo stesso numero di iterazioni
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+Inizio ricerca candidati alla fusione
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Not_Same_Iteration_Number.cpp processato con successo
+============================================================
+FILE: Normal_vs_Guarded.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 1 L2 guarded: 0
+ERRORE: Il loop 0x5620aed542c0 ed il loop 0x5620aed54358 non hanno entrambi una guardia
+L1 guarded: 1 L2 guarded: 0
+ERRORE: Il loop 0x5620aed542c0 ed il loop 0x5620aed543f0 non hanno entrambi una guardia
+L1 guarded: 0 L2 guarded: 1
+ERRORE: Il loop 0x5620aed54358 ed il loop 0x5620aed542c0 non hanno entrambi una guardia
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x5620aed54358 e 0x5620aed543f0
+Fine controllo della semantica della guardia di 0x5620aed54358 e 0x5620aed543f0: SUPERATO
+Inizio controllo adiacenza di 0x5620aed54358 e 0x5620aed543f0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x5620aed54358 ed il loop 0x5620aed543f0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 1
+ERRORE: Il loop 0x5620aed543f0 ed il loop 0x5620aed542c0 non hanno entrambi una guardia
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x5620aed543f0 e 0x5620aed54358
+Fine controllo della semantica della guardia di 0x5620aed543f0 e 0x5620aed54358: SUPERATO
+Inizio controllo adiacenza di 0x5620aed543f0 e 0x5620aed54358
+ERRORE: Il loop 0x5620aed543f0 ed il loop 0x5620aed54358 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Normal_vs_Guarded.cpp processato con successo
+============================================================
+FILE: Negative_Deps.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55675adea5f0 e 0x55675adea688
+Fine controllo della semantica della guardia di 0x55675adea5f0 e 0x55675adea688: SUPERATO
+Inizio controllo adiacenza di 0x55675adea5f0 e 0x55675adea688
+ERRORE: Il loop 0x55675adea5f0 ed il loop 0x55675adea688 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55675adea5f0 e 0x55675adea720
+Fine controllo della semantica della guardia di 0x55675adea5f0 e 0x55675adea720: SUPERATO
+Inizio controllo adiacenza di 0x55675adea5f0 e 0x55675adea720
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x55675adea5f0 ed il loop 0x55675adea720 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55675adea688 e 0x55675adea5f0
+Fine controllo della semantica della guardia di 0x55675adea688 e 0x55675adea5f0: SUPERATO
+Inizio controllo adiacenza di 0x55675adea688 e 0x55675adea5f0
+Fine controllo adiacenza di 0x55675adea688 e 0x55675adea5f0: SUPERATO
+Inizio controllo trip count di 0x55675adea688 e 0x55675adea5f0
+Fine controllo adiacenza di 0x55675adea688 e 0x55675adea5f0: SUPERATO
+Inizio controllo di equivalenza di control flow di 0x55675adea688 e 0x55675adea5f0
+Fine controllo di equivalenza di control flow di 0x55675adea688 e 0x55675adea5f0: SUPERATO
+Inizio controllo dipendenze di 0x55675adea688 e 0x55675adea5f0
+ERRORE: Il loop 0x55675adea688 ed il loop 0x55675adea5f0 hanno una NegativeDistanceDeps
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55675adea688 e 0x55675adea720
+Fine controllo della semantica della guardia di 0x55675adea688 e 0x55675adea720: SUPERATO
+Inizio controllo adiacenza di 0x55675adea688 e 0x55675adea720
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x55675adea688 ed il loop 0x55675adea720 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55675adea720 e 0x55675adea5f0
+Fine controllo della semantica della guardia di 0x55675adea720 e 0x55675adea5f0: SUPERATO
+Inizio controllo adiacenza di 0x55675adea720 e 0x55675adea5f0
+ERRORE: Il loop 0x55675adea720 ed il loop 0x55675adea5f0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x55675adea720 e 0x55675adea688
+Fine controllo della semantica della guardia di 0x55675adea720 e 0x55675adea688: SUPERATO
+Inizio controllo adiacenza di 0x55675adea720 e 0x55675adea688
+ERRORE: Il loop 0x55675adea720 ed il loop 0x55675adea688 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Negative_Deps.cpp processato con successo
+============================================================
+FILE: L2_Has_More_Exit_Blocks.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x5594d7510340 e 0x5594d75103d8
+Fine controllo della semantica della guardia di 0x5594d7510340 e 0x5594d75103d8: SUPERATO
+Inizio controllo adiacenza di 0x5594d7510340 e 0x5594d75103d8
+ERRORE: Il loop 0x5594d7510340 ed il loop 0x5594d75103d8 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x5594d7510340 e 0x5594d7510470
+Fine controllo della semantica della guardia di 0x5594d7510340 e 0x5594d7510470: SUPERATO
+Inizio controllo adiacenza di 0x5594d7510340 e 0x5594d7510470
+ERRORE: Il loop 0x5594d7510340 ed il loop 0x5594d7510470 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x5594d75103d8 e 0x5594d7510340
+Fine controllo della semantica della guardia di 0x5594d75103d8 e 0x5594d7510340: SUPERATO
+Inizio controllo adiacenza di 0x5594d75103d8 e 0x5594d7510340
+ERRORE: Il loop 0x5594d75103d8 ed il loop 0x5594d7510340 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x5594d75103d8 e 0x5594d7510470
+Fine controllo della semantica della guardia di 0x5594d75103d8 e 0x5594d7510470: SUPERATO
+Inizio controllo adiacenza di 0x5594d75103d8 e 0x5594d7510470
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x5594d75103d8 ed il loop 0x5594d7510470 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x5594d7510470 e 0x5594d7510340
+Fine controllo della semantica della guardia di 0x5594d7510470 e 0x5594d7510340: SUPERATO
+Inizio controllo adiacenza di 0x5594d7510470 e 0x5594d7510340
+ERRORE: Il loop 0x5594d7510470 ed il loop 0x5594d7510340 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x5594d7510470 e 0x5594d75103d8
+Fine controllo della semantica della guardia di 0x5594d7510470 e 0x5594d75103d8: SUPERATO
+Inizio controllo adiacenza di 0x5594d7510470 e 0x5594d75103d8
+ERRORE: Il loop 0x5594d7510470 ed il loop 0x5594d75103d8 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] L2_Has_More_Exit_Blocks.cpp processato con successo
+============================================================
+FILE: Not_Same_Step.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt lf (plugin) ---
+Inizio ricerca candidati alla fusione
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561068b510c0 e 0x561068b51158
+Fine controllo della semantica della guardia di 0x561068b510c0 e 0x561068b51158: SUPERATO
+Inizio controllo adiacenza di 0x561068b510c0 e 0x561068b51158
+ERRORE: Il loop 0x561068b510c0 ed il loop 0x561068b51158 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561068b510c0 e 0x561068b511f0
+Fine controllo della semantica della guardia di 0x561068b510c0 e 0x561068b511f0: SUPERATO
+Inizio controllo adiacenza di 0x561068b510c0 e 0x561068b511f0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x561068b510c0 ed il loop 0x561068b511f0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561068b51158 e 0x561068b510c0
+Fine controllo della semantica della guardia di 0x561068b51158 e 0x561068b510c0: SUPERATO
+Inizio controllo adiacenza di 0x561068b51158 e 0x561068b510c0
+Fine controllo adiacenza di 0x561068b51158 e 0x561068b510c0: SUPERATO
+Inizio controllo trip count di 0x561068b51158 e 0x561068b510c0
+ERRORE: Il loop 0x561068b51158 ed il loop 0x561068b510c0 non hanno lo stesso numero di iterazioni
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561068b51158 e 0x561068b511f0
+Fine controllo della semantica della guardia di 0x561068b51158 e 0x561068b511f0: SUPERATO
+Inizio controllo adiacenza di 0x561068b51158 e 0x561068b511f0
+Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe
+ERRORE: Il loop 0x561068b51158 ed il loop 0x561068b511f0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561068b511f0 e 0x561068b510c0
+Fine controllo della semantica della guardia di 0x561068b511f0 e 0x561068b510c0: SUPERATO
+Inizio controllo adiacenza di 0x561068b511f0 e 0x561068b510c0
+ERRORE: Il loop 0x561068b511f0 ed il loop 0x561068b510c0 non sono adiacenti
+L1 guarded: 0 L2 guarded: 0
+Inizio controllo della semantica della guardia di 0x561068b511f0 e 0x561068b51158
+Fine controllo della semantica della guardia di 0x561068b511f0 e 0x561068b51158: SUPERATO
+Inizio controllo adiacenza di 0x561068b511f0 e 0x561068b51158
+ERRORE: Il loop 0x561068b511f0 ed il loop 0x561068b51158 non sono adiacenti
+Fine ricerca candidati alla fusione
+Nessun candidato trovato per la fusione
+[OK] Not_Same_Step.cpp processato con successo
+============================================================

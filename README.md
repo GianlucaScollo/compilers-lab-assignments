@@ -38,7 +38,10 @@ root/
 │   ├── TEST/                       # Cartella contenente i vari file di test
 │   │   ├── Edges_TEST/             # Cartella con i file di test che non passano tutti i controlli
 │   │   └── Successful_TEST/        # Cartella con i file di test che passano tutti i controlli
-│   └── README.md
+│   ├── build.sh                    # Script per fare il build del passo
+│   ├── output.log                  # Risultato dell'esecuzione dello script test.sh
+│   ├── README.md
+│   └── test.sh                     # Script per ottenere i file di test ottimizzati
 ├── .gitignore                      # gitignore file
 └── README.md                       # Attualmente ti trovi qui
 ```

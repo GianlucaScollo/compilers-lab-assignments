@@ -19,12 +19,14 @@ Non tutti i loop si possono fondere bisogna che siano rispettate le seguenti con
 
 Una volta effettuati questi accertamenti per i due loop, presi in considerazione, si può passare a fare la fusione 
 
-## Testing
+## Usage
 
-Per testare i passi di ottimizzazione si può eseguire lo script test.sh a cui si devono passare come argomenti:
-1. Directory in cui sono contenuti i file .cpp e/o .ll
-2. Directory in cui è contenuto il file .so del passo
-3. Nome del file su cui salvare l'output del passo per ogni file su cui viene eseguito
+Per testare i passi di ottimizzazione bisogna fare i seguenti comandi:
+1. `export LLVM_DIR=<installation/dir/of/llvm/19>/bin`
+2. `./build.sh`
+3. `./test.sh`
+
+Una volta che i due script hanno finito si possono visionare i risultati guardando il file `output.log`
 
 ---
 
