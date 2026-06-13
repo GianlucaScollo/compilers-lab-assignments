@@ -7,14 +7,16 @@ int LoopFusion_base(int N) {
     int i = 0;
     int j = 0;
 
-    if(i < N){
+    int x = 100;
+
+    if(x < N){
         do {
             A[i] = (i * 3) + 7;
             i++;
         } while (i < N);
     }
     // L2 
-    if(j < N){
+    if(x > N){
         do {
             B[j] = A[j] + (j ^ 5);
             j++;

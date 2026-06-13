@@ -1,5 +1,5 @@
-; ModuleID = './TEST/Successful_TEST//Both_Guarded.m2r.ll'
-source_filename = "./TEST/Successful_TEST//Both_Guarded.cpp"
+; ModuleID = './TEST/Successful_TEST/Both_Guarded.m2r.ll'
+source_filename = "./TEST/Successful_TEST/Both_Guarded.cpp"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
@@ -7,7 +7,7 @@ target triple = "x86_64-unknown-linux-gnu"
 define dso_local noundef i32 @_Z15LoopFusion_basei(i32 noundef %0) #0 {
   %2 = alloca [64 x i32], align 16
   %3 = alloca [64 x i32], align 16
-  %4 = icmp slt i32 0, %0
+  %4 = icmp slt i32 100, %0
   br i1 %4, label %5, label %15
 
 5:                                                ; preds = %1
@@ -31,7 +31,7 @@ define dso_local noundef i32 @_Z15LoopFusion_basei(i32 noundef %0) #0 {
   br label %15
 
 15:                                               ; preds = %14, %1
-  %16 = icmp slt i32 0, %0
+  %16 = icmp sgt i32 100, %0
   br i1 %16, label %17, label %30
 
 17:                                               ; preds = %15

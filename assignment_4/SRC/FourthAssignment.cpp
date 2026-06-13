@@ -117,7 +117,7 @@ namespace {
     if(L1->getLoopGuardBranch() != nullptr && L2->getLoopGuardBranch() != nullptr){
       bool Gdominates = DT.dominates(L1->getLoopGuardBranch()->getParent(), L2->getLoopGuardBranch()->getParent());
       bool GpostDominates = PDT.dominates(L2->getLoopGuardBranch()->getParent(), L1->getLoopGuardBranch()->getParent());
-      return headerCFE && Gdominates && GpostDominates;
+      return /*headerCFE &&*/ Gdominates && GpostDominates;
     }
 
     return headerCFE;
