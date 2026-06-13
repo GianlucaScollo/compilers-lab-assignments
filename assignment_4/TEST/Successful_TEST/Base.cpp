@@ -12,12 +12,12 @@ int LoopFusion_both_guarded(int N) {
   if (N > 64 || N < 0)
     N = 64;
 
-  // Loop 1 guarded
+  // Loop 1
   for (int i = 0; i < N; ++i) {
     A[i] = (i + 2) * (i + 2);
   }
 
-  // Loop 2 guarded
+  // Loop 2
   for (int i = 0; i < N; ++i) {
     B[i] = A[i] + (N - i);
   }

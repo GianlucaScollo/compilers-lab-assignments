@@ -21,7 +21,8 @@ int LoopFusion_normal_vs_guarded(int N) {
   } while (i < N);
 
   int j = 0;
-  // Loop 1 unguarded
+
+  // Loop 2 guarded
   if (j < N){
     do {
       B[i] = A[i] + 10;

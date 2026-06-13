@@ -3,18 +3,19 @@ int LoopFusion_base(int N) {
     int A[64];
     int B[64];
 
-    // L1
     int i = 0;
     int j = 0;
 
     int x = 100;
 
+    // L1
     if(x < N){
         do {
             A[i] = (i * 3) + 7;
             i++;
         } while (i < N);
     }
+
     // L2 
     if(x > N){
         do {

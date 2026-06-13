@@ -17,12 +17,12 @@ int LoopFusion_base(int N) {
     A[i] = (i * 3) + 7;
   }
 
-  int j = 0;
+  int x = 22;
 
   // L2
-  for (; j < N; j++) {
+  for (int j = 0; j < N; j++) {
     B[j] = A[j] + (j ^ 5);
   }
 
-  return B[N-1];
+  return B[N-1]+x;
 }
