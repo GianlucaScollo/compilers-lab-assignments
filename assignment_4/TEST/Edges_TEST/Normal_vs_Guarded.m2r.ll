@@ -60,33 +60,37 @@ define dso_local noundef i32 @_Z28LoopFusion_normal_vs_guardedi(i32 noundef %0) 
   br i1 %29, label %19, label %30, !llvm.loop !8
 
 30:                                               ; preds = %28
-  br label %31
+  %31 = icmp slt i32 0, %.0
+  br i1 %31, label %32, label %44
 
-31:                                               ; preds = %40, %30
-  %.03 = phi i32 [ 0, %30 ], [ %41, %40 ]
-  %32 = icmp slt i32 %.03, %.0
-  br i1 %32, label %33, label %42
+32:                                               ; preds = %30
+  br label %33
 
-33:                                               ; preds = %31
-  %34 = sext i32 %.03 to i64
+33:                                               ; preds = %41, %32
+  %.03 = phi i32 [ 0, %32 ], [ %40, %41 ]
+  %34 = sext i32 %27 to i64
   %35 = getelementptr inbounds [64 x i32], ptr %2, i64 0, i64 %34
   %36 = load i32, ptr %35, align 4
   %37 = add nsw i32 %36, 10
-  %38 = sext i32 %.03 to i64
+  %38 = sext i32 %27 to i64
   %39 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %38
   store i32 %37, ptr %39, align 4
-  br label %40
+  %40 = add nsw i32 %.03, 1
+  br label %41
 
-40:                                               ; preds = %33
-  %41 = add nsw i32 %.03, 1
-  br label %31, !llvm.loop !9
+41:                                               ; preds = %33
+  %42 = icmp slt i32 %27, %.0
+  br i1 %42, label %33, label %43, !llvm.loop !9
 
-42:                                               ; preds = %31
-  %43 = sub nsw i32 %.0, 1
-  %44 = sext i32 %43 to i64
-  %45 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %44
-  %46 = load i32, ptr %45, align 4
-  ret i32 %46
+43:                                               ; preds = %41
+  br label %44
+
+44:                                               ; preds = %43, %30
+  %45 = sub nsw i32 %.0, 1
+  %46 = sext i32 %45 to i64
+  %47 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %46
+  %48 = load i32, ptr %47, align 4
+  ret i32 %48
 }
 
 attributes #0 = { mustprogress noinline nounwind uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }

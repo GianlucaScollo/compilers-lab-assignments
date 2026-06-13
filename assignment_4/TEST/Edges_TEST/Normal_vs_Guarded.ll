@@ -79,39 +79,45 @@ define dso_local noundef i32 @_Z28LoopFusion_normal_vs_guardedi(i32 noundef %0) 
 
 45:                                               ; preds = %41
   store i32 0, ptr %7, align 4
-  br label %46
+  %46 = load i32, ptr %7, align 4
+  %47 = load i32, ptr %2, align 4
+  %48 = icmp slt i32 %46, %47
+  br i1 %48, label %49, label %66
 
-46:                                               ; preds = %59, %45
-  %47 = load i32, ptr %7, align 4
-  %48 = load i32, ptr %2, align 4
-  %49 = icmp slt i32 %47, %48
-  br i1 %49, label %50, label %62
+49:                                               ; preds = %45
+  br label %50
 
-50:                                               ; preds = %46
-  %51 = load i32, ptr %7, align 4
+50:                                               ; preds = %61, %49
+  %51 = load i32, ptr %6, align 4
   %52 = sext i32 %51 to i64
   %53 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %52
   %54 = load i32, ptr %53, align 4
   %55 = add nsw i32 %54, 10
-  %56 = load i32, ptr %7, align 4
+  %56 = load i32, ptr %6, align 4
   %57 = sext i32 %56 to i64
   %58 = getelementptr inbounds [64 x i32], ptr %4, i64 0, i64 %57
   store i32 %55, ptr %58, align 4
-  br label %59
+  %59 = load i32, ptr %7, align 4
+  %60 = add nsw i32 %59, 1
+  store i32 %60, ptr %7, align 4
+  br label %61
 
-59:                                               ; preds = %50
-  %60 = load i32, ptr %7, align 4
-  %61 = add nsw i32 %60, 1
-  store i32 %61, ptr %7, align 4
-  br label %46, !llvm.loop !9
-
-62:                                               ; preds = %46
+61:                                               ; preds = %50
+  %62 = load i32, ptr %6, align 4
   %63 = load i32, ptr %2, align 4
-  %64 = sub nsw i32 %63, 1
-  %65 = sext i32 %64 to i64
-  %66 = getelementptr inbounds [64 x i32], ptr %4, i64 0, i64 %65
-  %67 = load i32, ptr %66, align 4
-  ret i32 %67
+  %64 = icmp slt i32 %62, %63
+  br i1 %64, label %50, label %65, !llvm.loop !9
+
+65:                                               ; preds = %61
+  br label %66
+
+66:                                               ; preds = %65, %45
+  %67 = load i32, ptr %2, align 4
+  %68 = sub nsw i32 %67, 1
+  %69 = sext i32 %68 to i64
+  %70 = getelementptr inbounds [64 x i32], ptr %4, i64 0, i64 %69
+  %71 = load i32, ptr %70, align 4
+  ret i32 %71
 }
 
 attributes #0 = { mustprogress noinline nounwind uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
