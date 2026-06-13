@@ -466,7 +466,12 @@ namespace {
         Exit2->removePredecessor(Header2);
 
         // La branch che, in caso di condizione del loop falsa, portava al blocco Exit1 ora porta ad Exit2
-        Header1->getTerminator()->replaceSuccessorWith(Exit1, Exit2);
+        //Header1->getTerminator()->replaceSuccessorWith(Exit1, Exit2);
+        BasicBlock *ExitingBlock1 = L1->getExitingBlock();
+
+        if (ExitingBlock1) {
+          ExitingBlock1->getTerminator()->replaceSuccessorWith(Exit1, Exit2);
+        }
         
         // Conservo il valore che assume il phi node quando il flusso arriva da Latch1
         Value* phiValue = getPHIValue(Header1, Latch1);
