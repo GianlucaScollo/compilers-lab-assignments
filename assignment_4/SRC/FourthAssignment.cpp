@@ -47,15 +47,24 @@ namespace {
   // CONDIZIONE 1
   // Controllo se i due loop sono adiacenti tra di loro
   bool areLoopsAdjacent(Loop *L1, Loop *L2, bool areGuarded) {
-    BasicBlock *ExitL1 = L1->getUniqueExitBlock();
+    BasicBlock *ExitL1;
+    if(L1->isRotatedForm())
+      ExitL1 = L1->getLoopLatch()->getTerminator()->getSuccessor(1);
+    ExitL1 = L1->getUniqueExitBlock();
 
     // Controllo se L1 ha un solo punto di uscita.
-    if (!ExitL1) return false;
+    if (!ExitL1){
+      outs() << "Errore nell'ottenimento del blocco di uscita di L1\n";
+      return false;
+    }
 
     BasicBlock *PreheaderLoop2 = L2->getLoopPreheader();
 
     // Controllo il preheader di L2, verifico che esista e che sia "vuoto"
-    if (!PreheaderLoop2 || !isBlockSafeForFusion(PreheaderLoop2)) return false;
+    if (!PreheaderLoop2 || !isBlockSafeForFusion(PreheaderLoop2)){
+      outs() << "Errore nell'ottenimento del Preheader di L2 o il Preheader non è safe\n";
+      return false;
+    } 
 
     // Controllo se sono dei loop guarded
     if (areGuarded) {
@@ -65,10 +74,13 @@ namespace {
       BasicBlock *GuardedBlockLoop2 = GuardBranchL2->getParent();
 
       // Controllo che anche la guardia di L2 sia vuota
-      if (!isBlockSafeForFusion(GuardedBlockLoop2)) return false;
+      if (!isBlockSafeForFusion(GuardedBlockLoop2)){
+        outs() << "Errore il GuardedBlock2 non è safe\n";
+        return false;
+      }
 
       // Verifico che l'uscita di L1 sbatta contro la guardia di L2
-      return (ExitL1 == GuardedBlockLoop2);
+      return (ExitL1->getSingleSuccessor() == GuardedBlockLoop2);
     }
 
     // Se non sono guarded, verifico che l'uscita di L1 sbatta contro il preheader di L2
@@ -94,27 +106,6 @@ namespace {
     return TC1 == TC2;
   }
 
-  /*// Determina se gli step di incremento del contatore sono uguali
-  bool sameSteps(Loop* L1, Loop* L2, ScalarEvolution &SE){
-    PHINode *iv1 = L1->getInductionVariable(SE);
-    PHINode *iv2 = L2->getInductionVariable(SE);
-    auto ar1 = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(iv1));
-    auto ar2 = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(iv2));
-
-    if (!ar1 || !ar2){
-        return false;
-    }
-
-    auto step1 = ar1->getStepRecurrence(SE);
-    auto step2 = ar2->getStepRecurrence(SE);
-
-    // Controllo che i valori di step1 e step2 non siano indeterminati
-    if((!SE.isKnownPositive(step1) && !SE.isKnownNegative(step1)) || (!SE.isKnownPositive(step2) && !SE.isKnownNegative(step2)))
-        return false;
-        
-    return SE.getMinusSCEV(step1, step2)->isZero();
-  }*/
-
   // CONDIZIONE 3
   // Verifica Control Flow Equivalence
   bool isControlFlowEquivalent(Loop *L1, Loop *L2, DominatorTree &DT, PostDominatorTree &PDT) {
@@ -124,7 +115,15 @@ namespace {
     // L2 deve POST-dominare L1
     bool postDominates = PDT.dominates(L2->getHeader(), L1->getHeader());
     
-    return dominates && postDominates;
+    bool headerCFE = dominates && postDominates;
+
+    if(L1->getLoopGuardBranch() != nullptr && L2->getLoopGuardBranch() != nullptr){
+      bool Gdominates = DT.dominates(L1->getLoopGuardBranch()->getParent(), L2->getLoopGuardBranch()->getParent());
+      bool GpostDominates = PDT.dominates(L2->getLoopGuardBranch()->getParent(), L1->getLoopGuardBranch()->getParent());
+      return headerCFE && Gdominates && GpostDominates;
+    }
+
+    return headerCFE;
   }
 
   // Funzione helper per ottenere puntatori di solo load/store 
@@ -202,10 +201,10 @@ namespace {
       if (!P1) continue;
 
       for (Instruction *I2 : MemInstsL2) {
-        //In caso di read-after-read non ho interesse nel fare controlli
-        //dato che a prescindere non genera conflitti
-        //A noi interessa gestire:
-        //read-after-write, write-after-write e le write-after-read
+        // In caso di read-after-read non ho interesse nel fare controlli
+        // dato che a prescindere non genera conflitti
+        // A noi interessa gestire:
+        // read-after-write, write-after-write e le write-after-read
         if (isa<LoadInst>(I1) && isa<LoadInst>(I2)) {
           continue;
         }
@@ -278,19 +277,19 @@ namespace {
         if (L1 == L2) continue;
 
         bool isL2Guarded = (L2->getLoopGuardBranch() != nullptr);
-
+        outs() << "L1 guarded: " << isL1Guarded << " L2 guarded: " << isL2Guarded << "\n";
         if (isL1Guarded != isL2Guarded){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno entrambi una guardia\n";
           continue;
         }
 
-        /* Se sono guarded, controlliamo anche che abbiano la stessa semantica
+        //Se sono guarded, controlliamo anche che abbiano la stessa semantica
         outs() << "Inizio controllo della semantica della guardia di "<< L1 <<" e " << L2 << "\n";
         if (isL1Guarded && !haveSameGuardSemantics(L1, L2)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno la stessa guardia\n";
           continue;
         }
-        outs() << "Fine controllo della semantica della guardia di "<< L1 <<" e " << L2 << ": SUPERATO\n";*/
+        outs() << "Fine controllo della semantica della guardia di "<< L1 <<" e " << L2 << ": SUPERATO\n";
 
         // Controllo l'adiacenza dei due loop
         outs() << "Inizio controllo adiacenza di "<< L1 <<" e " << L2 << "\n";
@@ -307,14 +306,6 @@ namespace {
           continue;
         }
         outs() << "Fine controllo adiacenza di "<< L1 <<" e " << L2 << ": SUPERATO\n";
-
-        /*// Controllo che i due loop abbiano lo stesso step
-        outs() << "Inizio controllo step di "<< L1 <<" e " << L2 << "\n";
-        if (!sameSteps(L1, L2, SE)){
-          outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno lo stesso step\n";
-          continue;
-        }
-        outs() << "Fine controllo step di "<< L1 <<" e " << L2 << ": SUPERATO\n";*/
 
         // Controllo che il Control Flow dei due loop sia equivalente
         outs() << "Inizio controllo di equivalenza di control flow di "<< L1 <<" e " << L2 << "\n";
@@ -363,10 +354,7 @@ namespace {
       if (!StepI) continue;
 
       bool UsesPN = false;
-      /*for (Value *Op : StepI->operands())
-        if (Op == &PN) { UsesPN = true; break; }
 
-      if (!UsesPN) continue;*/
       for(User* u : PN.users()){
         if(u == StepI){
           UsesPN = true;

@@ -1,10 +1,10 @@
-; ModuleID = './TEST/Successful_TEST//Base.ll'
-source_filename = "./TEST/Successful_TEST//Base.cpp"
+; ModuleID = './TEST/Successful_TEST//Rotated.m2r.ll'
+source_filename = "./TEST/Successful_TEST//Rotated.cpp"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
 ; Function Attrs: mustprogress noinline nounwind uwtable
-define dso_local noundef i32 @_Z23LoopFusion_both_guardedi(i32 noundef %0) #0 {
+define dso_local noundef i32 @_Z15LoopFusion_basei(i32 noundef %0) #0 {
   %2 = alloca [64 x i32], align 16
   %3 = alloca [64 x i32], align 16
   br label %4
@@ -42,53 +42,45 @@ define dso_local noundef i32 @_Z23LoopFusion_both_guardedi(i32 noundef %0) #0 {
   %.0 = phi i32 [ 64, %17 ], [ %0, %15 ]
   br label %19
 
-19:                                               ; preds = %27, %18
-  %.02 = phi i32 [ 0, %18 ], [ %28, %27 ]
-  %20 = icmp slt i32 %.02, %.0
-  br i1 %20, label %21, label %29
+19:                                               ; preds = %37, %18
+  %.02 = phi i32 [ 0, %18 ], [ %24, %37 ]
+  %20 = mul nsw i32 %.02, 3
+  %21 = add nsw i32 %20, 7
+  %22 = sext i32 %.02 to i64
+  %23 = getelementptr inbounds [64 x i32], ptr %2, i64 0, i64 %22
+  store i32 %21, ptr %23, align 4
+  %24 = add nsw i32 %.02, 1
+  br label %25
 
-21:                                               ; preds = %19
-  %22 = add nsw i32 %.02, 2
-  %23 = add nsw i32 %.02, 2
-  %24 = mul nsw i32 %22, %23
-  %25 = sext i32 %.02 to i64
-  %26 = getelementptr inbounds [64 x i32], ptr %2, i64 0, i64 %25
-  store i32 %24, ptr %26, align 4
-  br label %27
+25:                                               ; preds = %19
+  %26 = icmp slt i32 %24, %.0
+  br i1 %26, label %28, label %27, !llvm.loop !8
 
-27:                                               ; preds = %21
-  %28 = add nsw i32 %.02, 1
-  br label %19, !llvm.loop !8
+27:                                               ; preds = %25
+  br label %28
 
-29:                                               ; preds = %19
-  br label %30
+28:                                               ; preds = %25, %27
+  %29 = sext i32 %.02 to i64
+  %30 = getelementptr inbounds [64 x i32], ptr %2, i64 0, i64 %29
+  %31 = load i32, ptr %30, align 4
+  %32 = xor i32 %.02, 5
+  %33 = add nsw i32 %31, %32
+  %34 = sext i32 %.02 to i64
+  %35 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %34
+  store i32 %33, ptr %35, align 4
+  %36 = add nsw i32 %.02, 1
+  br label %37
 
-30:                                               ; preds = %40, %29
-  %.03 = phi i32 [ 0, %29 ], [ %41, %40 ]
-  %31 = icmp slt i32 %.03, %.0
-  br i1 %31, label %32, label %42
+37:                                               ; preds = %28
+  %38 = icmp slt i32 %36, %.0
+  br i1 %38, label %19, label %39, !llvm.loop !9
 
-32:                                               ; preds = %30
-  %33 = sext i32 %.03 to i64
-  %34 = getelementptr inbounds [64 x i32], ptr %2, i64 0, i64 %33
-  %35 = load i32, ptr %34, align 4
-  %36 = sub nsw i32 %.0, %.03
-  %37 = add nsw i32 %35, %36
-  %38 = sext i32 %.03 to i64
-  %39 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %38
-  store i32 %37, ptr %39, align 4
-  br label %40
-
-40:                                               ; preds = %32
-  %41 = add nsw i32 %.03, 1
-  br label %30, !llvm.loop !9
-
-42:                                               ; preds = %30
-  %43 = sub nsw i32 %.0, 1
-  %44 = sext i32 %43 to i64
-  %45 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %44
-  %46 = load i32, ptr %45, align 4
-  ret i32 %46
+39:                                               ; preds = %37
+  %40 = sub nsw i32 %.0, 1
+  %41 = sext i32 %40 to i64
+  %42 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %41
+  %43 = load i32, ptr %42, align 4
+  ret i32 %43
 }
 
 attributes #0 = { mustprogress noinline nounwind uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
