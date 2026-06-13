@@ -284,13 +284,13 @@ namespace {
           continue;
         }
 
-        /* Se sono guarded, controlliamo anche che abbiano la stessa semantica
+        //Se sono guarded, controlliamo anche che abbiano la stessa semantica
         outs() << "Inizio controllo della semantica della guardia di "<< L1 <<" e " << L2 << "\n";
         if (isL1Guarded && !haveSameGuardSemantics(L1, L2)){
           outs() << "ERRORE: Il loop " << L1 << " ed il loop " << L2 << " non hanno la stessa guardia\n";
           continue;
         }
-        outs() << "Fine controllo della semantica della guardia di "<< L1 <<" e " << L2 << ": SUPERATO\n";*/
+        outs() << "Fine controllo della semantica della guardia di "<< L1 <<" e " << L2 << ": SUPERATO\n";
 
         // Controllo l'adiacenza dei due loop
         outs() << "Inizio controllo adiacenza di "<< L1 <<" e " << L2 << "\n";
