@@ -52,11 +52,8 @@ namespace {
       ExitL1 = L1->getLoopLatch()->getTerminator()->getSuccessor(1);
     ExitL1 = L1->getUniqueExitBlock();
 
-    // Controllo se L1 ha un solo punto di uscita.
-    if (!ExitL1){
-      outs() << "Errore nell'ottenimento del blocco di uscita di L1\n";
-      return false;
-    }
+    // Controllo se L1 e L2 hanno più punti di uscita.
+    if (!ExitL1 || !L2->getUniqueExitBlock()) return false;
 
     BasicBlock *PreheaderLoop2 = L2->getLoopPreheader();
 
