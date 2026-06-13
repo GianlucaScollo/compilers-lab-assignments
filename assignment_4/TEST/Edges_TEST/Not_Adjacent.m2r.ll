@@ -1,5 +1,5 @@
-; ModuleID = './TEST/Edges_TEST/Not_Adjacent.ll'
-source_filename = "./TEST/Edges_TEST/Not_Adjacent.cpp"
+; ModuleID = 'TEST/Edges_TEST/Not_Adjacent.ll'
+source_filename = "TEST/Edges_TEST/Not_Adjacent.cpp"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
@@ -60,34 +60,46 @@ define dso_local noundef i32 @_Z15LoopFusion_basei(i32 noundef %0) #0 {
   br label %19, !llvm.loop !8
 
 28:                                               ; preds = %19
-  br label %29
+  %29 = icmp sgt i32 %.0, 14
+  br i1 %29, label %30, label %31
 
-29:                                               ; preds = %39, %28
-  %.03 = phi i32 [ 0, %28 ], [ %40, %39 ]
-  %30 = icmp slt i32 %.03, %.0
-  br i1 %30, label %31, label %41
+30:                                               ; preds = %28
+  br label %32
 
-31:                                               ; preds = %29
-  %32 = sext i32 %.03 to i64
-  %33 = getelementptr inbounds [64 x i32], ptr %2, i64 0, i64 %32
-  %34 = load i32, ptr %33, align 4
-  %35 = xor i32 %.03, 5
-  %36 = add nsw i32 %34, %35
-  %37 = sext i32 %.03 to i64
-  %38 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %37
-  store i32 %36, ptr %38, align 4
-  br label %39
+31:                                               ; preds = %28
+  br label %32
 
-39:                                               ; preds = %31
-  %40 = add nsw i32 %.03, 1
-  br label %29, !llvm.loop !9
+32:                                               ; preds = %31, %30
+  %.03 = phi i32 [ 44, %30 ], [ 2, %31 ]
+  br label %33
 
-41:                                               ; preds = %29
-  %42 = sub nsw i32 %.0, 1
-  %43 = sext i32 %42 to i64
-  %44 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %43
-  %45 = load i32, ptr %44, align 4
-  ret i32 %45
+33:                                               ; preds = %43, %32
+  %.04 = phi i32 [ 0, %32 ], [ %44, %43 ]
+  %34 = icmp slt i32 %.04, %.0
+  br i1 %34, label %35, label %45
+
+35:                                               ; preds = %33
+  %36 = sext i32 %.04 to i64
+  %37 = getelementptr inbounds [64 x i32], ptr %2, i64 0, i64 %36
+  %38 = load i32, ptr %37, align 4
+  %39 = xor i32 %.04, 5
+  %40 = add nsw i32 %38, %39
+  %41 = sext i32 %.04 to i64
+  %42 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %41
+  store i32 %40, ptr %42, align 4
+  br label %43
+
+43:                                               ; preds = %35
+  %44 = add nsw i32 %.04, 1
+  br label %33, !llvm.loop !9
+
+45:                                               ; preds = %33
+  %46 = sub nsw i32 %.0, 1
+  %47 = sext i32 %46 to i64
+  %48 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %47
+  %49 = load i32, ptr %48, align 4
+  %50 = add nsw i32 %49, %.03
+  ret i32 %50
 }
 
 attributes #0 = { mustprogress noinline nounwind uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }

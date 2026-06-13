@@ -17,7 +17,11 @@ int LoopFusion_base(int N) {
     A[i] = (i * 3) + 7;
   }
 
-  int x = 22;
+  int x=0;
+  if (N > 14)
+    x=44;
+  else
+    x=2;
 
   // L2
   for (int j = 0; j < N; j++) {

@@ -1,5 +1,5 @@
-; ModuleID = './TEST/Successful_TEST/Rotated.m2r.ll'
-source_filename = "./TEST/Successful_TEST/Rotated.cpp"
+; ModuleID = 'TEST/Successful_TEST/Rotated.m2r.ll'
+source_filename = "TEST/Successful_TEST/Rotated.cpp"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
@@ -54,9 +54,9 @@ define dso_local noundef i32 @_Z15LoopFusion_basei(i32 noundef %0) #0 {
 
 25:                                               ; preds = %19
   %26 = icmp slt i32 %24, %.0
-  br i1 %26, label %28, label %27, !llvm.loop !8
+  br i1 %26, label %28, label %39, !llvm.loop !8
 
-27:                                               ; preds = %25
+27:                                               ; No predecessors!
   br label %28
 
 28:                                               ; preds = %25, %27
@@ -75,7 +75,7 @@ define dso_local noundef i32 @_Z15LoopFusion_basei(i32 noundef %0) #0 {
   %38 = icmp slt i32 %36, %.0
   br i1 %38, label %19, label %39, !llvm.loop !9
 
-39:                                               ; preds = %37
+39:                                               ; preds = %25, %37
   %40 = sub nsw i32 %.0, 1
   %41 = sext i32 %40 to i64
   %42 = getelementptr inbounds [64 x i32], ptr %3, i64 0, i64 %41
