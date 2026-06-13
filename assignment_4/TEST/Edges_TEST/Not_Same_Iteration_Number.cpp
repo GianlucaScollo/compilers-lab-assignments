@@ -18,7 +18,7 @@ int LoopFusion_base(int N) {
   }
   // L2
   for (int j=0; j < N*2; j++) {
-    B[j] = A[std::ceil(j/2)] + (j ^ 5);
+    B[j] = A[int(std::ceil(j/2))] + (j ^ 5);
   }
 
   return B[N-1];
