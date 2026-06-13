@@ -9,7 +9,7 @@ set(DLT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 
 # Add the location of LLVMConfig.cmake to CMake search paths (so that
 # find_package can locate it)
-list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/")
+list(APPEND CMAKE_PREFIX_PATH "${DLT_LLVM_INSTALL_DIR}/lib/cmake/llvm/")
 
 find_package(LLVM CONFIG)
 if("${LLVM_VERSION_MAJOR}" VERSION_LESS 19)
