@@ -79,14 +79,9 @@ struct AlgebraicIdentity: PassInfoMixin<AlgebraicIdentity> {
                     if (C1 && C1->isZero()) ReplaceWith = Op0;
                 }
 
-                // caso: x * 0 -> 0 oppure 0 * x -> 0
                 // caso: x * 1 -> x oppure 1 * x -> x
                 else if (binOp->getOpcode() == Instruction::Mul) {
-                    // controllo se uno dei due operandi sia zero
-                    if ((C0 && C0->isZero()) || (C1 && C1->isZero())) {
-                        ReplaceWith = ConstantInt::get(Ty, 0);
-                    }
-                    else if (C0 && C0->isOne()) ReplaceWith = Op1;
+                    if (C0 && C0->isOne()) ReplaceWith = Op1;
                     else if (C1 && C1->isOne()) ReplaceWith = Op0;
                 }
 

@@ -9,7 +9,6 @@ In questo assignment sono stati implementati 3 passi di ottimizzazione LLVM:
         - `𝑥 + 0 = 0 + 𝑥 ⇒ 𝑥`
         - `𝑥 × 1 = 1 × 𝑥 ⇒ 𝑥`
         - `(extra): 𝑥 - 0 ⇒ 𝑥`
-        - `(extra): 𝑥 × 0 = 0 × 𝑥 ⇒ 0`
         - `(extra): x / 1 ⇒ x`
         - `(extra): x << 0 = x >> 0 ⇒ x`
 
