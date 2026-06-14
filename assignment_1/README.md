@@ -24,6 +24,15 @@ In questo assignment sono stati implementati 3 passi di ottimizzazione LLVM:
         - `𝑎 = 𝑏 + 1, 𝑐 = 𝑎 − 1 ⇒ 𝑎 = 𝑏 + 1, 𝑐 = 𝑏`
         - `(extra): 𝑎 = 2 * b, 𝑐 = 𝑎 / 2 ⇒ 𝑎 = 2 * b, 𝑐 = 𝑏`
 
+## Usage
+
+Per testare i passi di ottimizzazione bisogna fare i seguenti comandi:
+1. `export LLVM_DIR=<installation/dir/of/llvm/19>/bin`
+2. `./build.sh`
+3. `./test.sh`
+
+Una volta che i due script hanno finito si possono visionare i risultati guardando il file `output.log`
+
 ---
 
 ## Directory Structure

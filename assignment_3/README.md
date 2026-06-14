@@ -16,6 +16,15 @@ Un'istruzione anche se considerata loop-invariant non è detto che si possa poi 
 - non deve causare side effects, quindi deve essere safe da eseguire
 - deve dominare tutti gli usi all'interno del loop, quindi nel caso in cui venisse spostata non deve cambiare la semantica del programma
 
+## Usage
+
+Per testare i passi di ottimizzazione bisogna fare i seguenti comandi:
+1. `export LLVM_DIR=<installation/dir/of/llvm/19>/bin`
+2. `./build.sh`
+3. `./test.sh`
+
+Una volta che i due script hanno finito si possono visionare i risultati guardando il file `output.log`
+
 ---
 
 ## Directory Structure

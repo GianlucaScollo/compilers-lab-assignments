@@ -63,7 +63,7 @@ for filepath in "${files[@]}"; do
 
     # Step 3: plugin personalizzato
     echo "--- opt lf (plugin) ---" >> "$OUTPUT_FILE"
-    opt -S -load-pass-plugin "$BUILD_DIR/libFourthAssignment.so" \
+    opt -S -load-pass-plugin "$BUILD_DIR/libFirstAssignment.so" \
         -passes=lf "$m2r" -o "$opt_out" >> "$OUTPUT_FILE" 2>&1
     if [[ $? -ne 0 ]]; then
         echo "[ERRORE] opt lf fallito per $filename" >> "$OUTPUT_FILE"
