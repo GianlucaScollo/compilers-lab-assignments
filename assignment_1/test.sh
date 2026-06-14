@@ -17,17 +17,29 @@ if [[ ! -d "$TEST_DIR" ]]; then
     exit 1
 fi
 
-# Cerca tutti i file .cpp nella directory TEST e nelle sue sottocartelle
-mapfile -d '' files < <(find "$TEST_DIR" -type f -name '*.cpp' -print0)
+# Controlla che la directory BUILD esista
+if [[ ! -d "$BUILD_DIR" ]]; then
+    echo "Errore: la directory '$BUILD_DIR' non esiste."
+    exit 1
+fi
+
+# Controllo che il plugin esista
+if [[ ! -f "$BUILD_DIR/libFirstAssignment.so" ]]; then
+    echo "Errore: Plugin non trovato: $BUILD_DIR/libFirstAssignment.so"
+    exit 1
+fi
+
+# Cerca tutti i file .ll nella directory TEST e nelle sue sottocartelle
+mapfile -d '' files < <(find "$TEST_DIR" -type f -name '*.ll' -print0)
 
 if [[ ${#files[@]} -eq 0 ]]; then
-    echo "Nessun file .cpp trovato in '$TEST_DIR' o nelle sue sottocartelle."
+    echo "Nessun file .ll trovato in '$TEST_DIR' o nelle sue sottocartelle."
     exit 1
 fi
 
 for filepath in "${files[@]}"; do
-    filename="$(basename "$filepath")"          # nomefile.cpp
-    base="${filename%.cpp}"                     # nomefile
+    filename="$(basename "$filepath")"               # nomefile.ll
+    base="${filename%.ll}"                           # nomefile
     rel_dir="$(dirname "${filepath#$TEST_DIR/}")"
 
     if [[ "$rel_dir" == "." ]]; then
@@ -37,36 +49,29 @@ for filepath in "${files[@]}"; do
     fi
 
     ll="$out_dir/$base.ll"
-    m2r="$out_dir/$base.m2r.ll"
     opt_out="$out_dir/$base.optimized.ll"
 
     echo "$SEPARATOR" >> "$OUTPUT_FILE"
     echo "FILE: $filename" >> "$OUTPUT_FILE"
     echo "$SEPARATOR" >> "$OUTPUT_FILE"
 
-    # Step 1: compilazione con clang
-    echo "--- clang ---" >> "$OUTPUT_FILE"
-    clang -O0 -emit-llvm -S -c -Xclang -disable-O0-optnone \
-        "$filepath" -o "$ll" >> "$OUTPUT_FILE" 2>&1
-    if [[ $? -ne 0 ]]; then
-        echo "[ERRORE] clang fallito per $filename" >> "$OUTPUT_FILE"
+    if [[ "$rel_dir" == "Alg_id_TEST" ]]; then
+        PASS="alg-id"
+    elif [[ "$rel_dir" == "Multi_inst_opt_TEST" ]]; then
+        PASS="mul-ins-opt"
+    elif [[ "$rel_dir" == "Str_red_TEST" ]]; then
+        PASS="str-red-pass"
+    else
+        echo "[ERRORE] Cartella non riconosciuta" >> "$OUTPUT_FILE"
         continue
     fi
 
-    # Step 2: mem2reg
-    echo "--- opt mem2reg ---" >> "$OUTPUT_FILE"
-    opt -passes=mem2reg "$ll" -S -o "$m2r" >> "$OUTPUT_FILE" 2>&1
-    if [[ $? -ne 0 ]]; then
-        echo "[ERRORE] opt mem2reg fallito per $filename" >> "$OUTPUT_FILE"
-        continue
-    fi
-
-    # Step 3: plugin personalizzato
-    echo "--- opt lf (plugin) ---" >> "$OUTPUT_FILE"
+    # Step plugin personalizzato
+    echo "--- opt $PASS (plugin) ---" >> "$OUTPUT_FILE"
     opt -S -load-pass-plugin "$BUILD_DIR/libFirstAssignment.so" \
-        -passes=lf "$m2r" -o "$opt_out" >> "$OUTPUT_FILE" 2>&1
+        -passes="$PASS" "$ll" -o "$opt_out" >> "$OUTPUT_FILE" 2>&1
     if [[ $? -ne 0 ]]; then
-        echo "[ERRORE] opt lf fallito per $filename" >> "$OUTPUT_FILE"
+        echo "[ERRORE] opt $PASS fallito per $filename" >> "$OUTPUT_FILE"
         continue
     fi
 

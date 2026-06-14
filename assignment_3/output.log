@@ -1,0 +1,24 @@
+============================================================
+FILE: Test2.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt licm (plugin) ---
+[OK] Test2.cpp processato con successo
+============================================================
+FILE: Test1_dowhile.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt licm (plugin) ---
+Sposto l'istruzione:   %4 = mul nsw i32 %0, 2
+La funzione _Z10licm_test1ii è stata modificata.
+[OK] Test1_dowhile.cpp processato con successo
+============================================================
+FILE: Test1_while.cpp
+============================================================
+--- clang ---
+--- opt mem2reg ---
+--- opt licm (plugin) ---
+[OK] Test1_while.cpp processato con successo
+============================================================

@@ -17,6 +17,18 @@ if [[ ! -d "$TEST_DIR" ]]; then
     exit 1
 fi
 
+# Controlla che la directory BUILD esista
+if [[ ! -d "$BUILD_DIR" ]]; then
+    echo "Errore: la directory '$BUILD_DIR' non esiste."
+    exit 1
+fi
+
+# Controllo che il plugin esista
+if [[ ! -f "$BUILD_DIR/libThirdAssignment.so" ]]; then
+    echo "Errore: Plugin non trovato: $BUILD_DIR/libThirdAssignment.so"
+    exit 1
+fi
+
 # Cerca tutti i file .cpp nella directory TEST e nelle sue sottocartelle
 mapfile -d '' files < <(find "$TEST_DIR" -type f -name '*.cpp' -print0)
 
@@ -62,11 +74,11 @@ for filepath in "${files[@]}"; do
     fi
 
     # Step 3: plugin personalizzato
-    echo "--- opt lf (plugin) ---" >> "$OUTPUT_FILE"
+    echo "--- opt licm (plugin) ---" >> "$OUTPUT_FILE"
     opt -S -load-pass-plugin "$BUILD_DIR/libThirdAssignment.so" \
-        -passes=lf "$m2r" -o "$opt_out" >> "$OUTPUT_FILE" 2>&1
+        -passes=loopICM "$m2r" -o "$opt_out" >> "$OUTPUT_FILE" 2>&1
     if [[ $? -ne 0 ]]; then
-        echo "[ERRORE] opt lf fallito per $filename" >> "$OUTPUT_FILE"
+        echo "[ERRORE] opt licm fallito per $filename" >> "$OUTPUT_FILE"
         continue
     fi
 

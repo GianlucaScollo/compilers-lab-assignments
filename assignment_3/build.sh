@@ -9,8 +9,10 @@ echo "Inizializzazione build LLVM..."
 
 # Controlla se la directory build esiste, se no la crea
 if [[ ! -d "$BUILD_DIR" ]]; then
-    echo "Creazione directory build..."
+    echo "Creazione directory '$BUILD_DIR'..."
     mkdir -p "$BUILD_DIR"
+else
+    echo "Directory '$BUILD_DIR' gia' presente"
 fi
 
 # Entra nella directory build
@@ -30,6 +32,8 @@ if [[ ! -f "CMakeCache.txt" ]]; then
         cd ..
         exit 1
     fi
+else
+    echo "CMake gia' configurato!"
 fi
 
 echo "Compilazione del progetto..."

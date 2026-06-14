@@ -17,6 +17,18 @@ if [[ ! -d "$TEST_DIR" ]]; then
     exit 1
 fi
 
+# Controlla che la directory BUILD esista
+if [[ ! -d "$BUILD_DIR" ]]; then
+    echo "Errore: la directory '$BUILD_DIR' non esiste."
+    exit 1
+fi
+
+# Controllo che il plugin esista
+if [[ ! -f "$BUILD_DIR/libFourthAssignment.so" ]]; then
+    echo "Errore: Plugin non trovato: $BUILD_DIR/libFourthAssignment.so"
+    exit 1
+fi
+
 # Cerca tutti i file .cpp nella directory TEST e nelle sue sottocartelle
 mapfile -d '' files < <(find "$TEST_DIR" -type f -name '*.cpp' -print0)
 

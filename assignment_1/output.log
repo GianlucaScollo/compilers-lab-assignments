@@ -1,0 +1,213 @@
+============================================================
+FILE: div_16.optimized.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] div_16.optimized.optimized.ll processato con successo
+============================================================
+FILE: mul_15.optimized.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] mul_15.optimized.optimized.ll processato con successo
+============================================================
+FILE: Foo.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+Ottimizzazione NAF applicata con successo!
+Ottimizzazione Divisione applicata con successo!
+La funzione foo è stata modificata.
+[OK] Foo.ll processato con successo
+============================================================
+FILE: mul_-3.optimized.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] mul_-3.optimized.optimized.ll processato con successo
+============================================================
+FILE: mul_15.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+Ottimizzazione NAF applicata con successo!
+La funzione moltiplica_per_15 è stata modificata.
+[OK] mul_15.ll processato con successo
+============================================================
+FILE: mul_131.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] mul_131.optimized.ll processato con successo
+============================================================
+FILE: div_16.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] div_16.optimized.ll processato con successo
+============================================================
+FILE: mul_-3.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] mul_-3.optimized.ll processato con successo
+============================================================
+FILE: mul_131.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+Ottimizzazione NAF applicata con successo!
+La funzione mul_131 è stata modificata.
+[OK] mul_131.ll processato con successo
+============================================================
+FILE: mul_-3.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+Ottimizzazione NAF applicata con successo!
+La funzione moltiplica_per_meno_3 è stata modificata.
+[OK] mul_-3.ll processato con successo
+============================================================
+FILE: Foo.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] Foo.optimized.ll processato con successo
+============================================================
+FILE: mul_131.optimized.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] mul_131.optimized.optimized.ll processato con successo
+============================================================
+FILE: div_16.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+Ottimizzazione Divisione applicata con successo!
+La funzione divisione_16 è stata modificata.
+[OK] div_16.ll processato con successo
+============================================================
+FILE: Foo.optimized.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] Foo.optimized.optimized.ll processato con successo
+============================================================
+FILE: mul_15.optimized.ll
+============================================================
+--- opt str-red-pass (plugin) ---
+[OK] mul_15.optimized.ll processato con successo
+============================================================
+FILE: MIOpt1.optimized.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt1.optimized.ll processato con successo
+============================================================
+FILE: MIOpt3.optimized.optimized.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt3.optimized.optimized.ll processato con successo
+============================================================
+FILE: MIOpt2.optimized.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt2.optimized.ll processato con successo
+============================================================
+FILE: MIOpt3.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt3.ll processato con successo
+============================================================
+FILE: MIOpt1.optimized.optimized.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt1.optimized.optimized.ll processato con successo
+============================================================
+FILE: MIOpt3.optimized.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt3.optimized.ll processato con successo
+============================================================
+FILE: MIOpt1.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt1.ll processato con successo
+============================================================
+FILE: MIOpt2.optimized.optimized.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt2.optimized.optimized.ll processato con successo
+============================================================
+FILE: MIOpt2.ll
+============================================================
+--- opt mul-ins-opt (plugin) ---
+[OK] MIOpt2.ll processato con successo
+============================================================
+FILE: AlgIdTest_AllCases.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_AllCases.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_AddSub.optimized.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_AddSub.optimized.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_AddSub.ll
+============================================================
+--- opt alg-id (plugin) ---
+La funzione foo e' stata modificata.
+[OK] AlgIdTest_AddSub.ll processato con successo
+============================================================
+FILE: AlgIdTest_AllCases.ll
+============================================================
+--- opt alg-id (plugin) ---
+La funzione all e' stata modificata.
+[OK] AlgIdTest_AllCases.ll processato con successo
+============================================================
+FILE: AlgIdTest_Shifts.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_Shifts.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_Mul.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_Mul.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_AllCases.optimized.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_AllCases.optimized.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_Shifts.optimized.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_Shifts.optimized.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_Mul.optimized.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_Mul.optimized.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_Div.optimized.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_Div.optimized.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_Shifts.ll
+============================================================
+--- opt alg-id (plugin) ---
+La funzione foo e' stata modificata.
+[OK] AlgIdTest_Shifts.ll processato con successo
+============================================================
+FILE: AlgIdTest_AddSub.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_AddSub.optimized.ll processato con successo
+============================================================
+FILE: AlgIdTest_Mul.ll
+============================================================
+--- opt alg-id (plugin) ---
+La funzione foo e' stata modificata.
+[OK] AlgIdTest_Mul.ll processato con successo
+============================================================
+FILE: AlgIdTest_Div.ll
+============================================================
+--- opt alg-id (plugin) ---
+La funzione sdiv1 e' stata modificata.
+La funzione udiv1 e' stata modificata.
+[OK] AlgIdTest_Div.ll processato con successo
+============================================================
+FILE: AlgIdTest_Div.optimized.ll
+============================================================
+--- opt alg-id (plugin) ---
+[OK] AlgIdTest_Div.optimized.ll processato con successo
+============================================================
