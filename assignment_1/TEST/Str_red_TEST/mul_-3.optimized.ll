@@ -1,5 +1,5 @@
-; ModuleID = 'TEST/moltiplicazione_-3.ll'
-source_filename = "TEST/moltiplicazione_-3.ll"
+; ModuleID = 'TEST/Str_red_TEST/mul_-3.ll'
+source_filename = "TEST/Str_red_TEST/mul_-3.ll"
 
 define dso_local i32 @moltiplica_per_meno_3(i32 %x) {
 entry:

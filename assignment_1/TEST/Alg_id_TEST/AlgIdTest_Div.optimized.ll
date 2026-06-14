@@ -1,5 +1,5 @@
-; ModuleID = 'AlgId_TEST/AlgIdTest_Div.ll'
-source_filename = "AlgId_TEST/AlgIdTest_Div.ll"
+; ModuleID = 'TEST/Alg_id_TEST/AlgIdTest_Div.ll'
+source_filename = "TEST/Alg_id_TEST/AlgIdTest_Div.ll"
 
 define dso_local i32 @sdiv1(i32 noundef %x) {
 entry:

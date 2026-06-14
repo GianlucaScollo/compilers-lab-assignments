@@ -1,5 +1,5 @@
-; ModuleID = 'TEST/moltiplicazione_15.ll'
-source_filename = "TEST/motiplicazione_15.ll"
+; ModuleID = 'TEST/Str_red_TEST/mul_15.ll'
+source_filename = "TEST/Str_red_TEST/mul_15.ll"
 
 define dso_local i32 @moltiplica_per_15(i32 %x) {
 entry:

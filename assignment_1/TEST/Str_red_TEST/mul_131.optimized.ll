@@ -1,5 +1,5 @@
-; ModuleID = 'TEST/mul_131'
-source_filename = "TEST/mul_131"
+; ModuleID = 'TEST/Str_red_TEST/mul_131.ll'
+source_filename = "TEST/Str_red_TEST/mul_131.ll"
 
 define dso_local i128 @mul_131(i128 %x) {
 entry:
