@@ -25,18 +25,21 @@ root/
 │   ├── output.log                  # Risultato dell'esecuzione dello script test.sh
 │   ├── README.md                   # Descrizione dell'assignment
 │   └── test.sh                     # Script per ottenere i file di test ottimizzati
+│
 ├── assignment_2/                   # Second assignment: Dataflow Analysis di 3 problemi
 │   └── Dataflow_Analysis.pdf       # File con le analisi
+│
 ├── assignment_3/                   # Third assignment: implementazione del Loop-Invariant Code Motion
 │   ├── SRC/                        # Cartella con i file sorgenti
 │   │   ├── CMakeLists.txt          # File di configurazione per il comando cmake
 │   │   └── ThirdAssignment.cpp     # Implementazione del passo di ottimizzazione 
 │   ├── TEST/                       # Cartella contenente i vari file di test
-│   │   └── ...
+│   │   └── ...                     # Test vari
 │   ├── build.sh                    # Script per fare il build del passo
 │   ├── output.log                  # Risultato dell'esecuzione dello script test.sh
 │   ├── README.md                   # Descrizione dell'assignment
 │   └── test.sh                     # Script per ottenere i file di test ottimizzati
+│
 ├── assignment_4/                   # Fourth assignment: implementazione della Loop Fusion
 │   ├── SRC/                        # Cartella con i file sorgenti
 │   │   ├── CMakeLists.txt          # File di configurazione per il comando cmake
