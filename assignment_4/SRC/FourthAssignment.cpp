@@ -47,10 +47,7 @@ namespace {
   // CONDIZIONE 1
   // Controllo se i due loop sono adiacenti tra di loro
   bool areLoopsAdjacent(Loop *L1, Loop *L2, bool areGuarded) {
-    BasicBlock *ExitL1;
-    if(L1->isRotatedForm())
-      ExitL1 = L1->getLoopLatch()->getTerminator()->getSuccessor(1);
-    ExitL1 = L1->getUniqueExitBlock();
+    BasicBlock *ExitL1 = L1->getUniqueExitBlock();
 
     // Controllo se L1 e L2 hanno più punti di uscita.
     if (!ExitL1 || !L2->getUniqueExitBlock()) return false;
@@ -106,14 +103,15 @@ namespace {
   // CONDIZIONE 3
   // Verifica Control Flow Equivalence
   bool isControlFlowEquivalent(Loop *L1, Loop *L2, DominatorTree &DT, PostDominatorTree &PDT) {
-    // L1 deve dominare L2
+    // L1 deve dominare L2 (cioè per arrivare a L2 devo sempre passare per L1))
     bool dominates = DT.dominates(L1->getHeader(), L2->getHeader());
     
-    // L2 deve POST-dominare L1
+    // L2 deve POST-dominare L1 (cioè dopo il loop L1 devo sempre passare dal loop L2)
     bool postDominates = PDT.dominates(L2->getHeader(), L1->getHeader());
     
     bool headerCFE = dominates && postDominates;
 
+    // Caso in cui i due loop sono guarded
     if(L1->getLoopGuardBranch() != nullptr && L2->getLoopGuardBranch() != nullptr){
       bool Gdominates = DT.dominates(L1->getLoopGuardBranch()->getParent(), L2->getLoopGuardBranch()->getParent());
       bool GpostDominates = PDT.dominates(L2->getLoopGuardBranch()->getParent(), L1->getLoopGuardBranch()->getParent());
@@ -140,6 +138,7 @@ namespace {
     return U1 == U2;
   }
 
+  // Funzione helper per trasformare il contesto di SourceSCEV nel contesto di TargetLoop
   static const SCEV *translateSCEVToTargetLoop(const SCEV *SourceSCEV, Loop *TargetLoop, ScalarEvolution &SE) {
     
     // Controlliamo se l'equazione è un contatore di ciclo (AddRecExpr)
@@ -205,6 +204,7 @@ namespace {
         if (isa<LoadInst>(I1) && isa<LoadInst>(I2)) {
           continue;
         }
+
         Value *P2 = getPtrIfLoadOrStore(I2);
         if (!P2) continue;
 
@@ -368,11 +368,11 @@ namespace {
 
     //in tal caso il body è l'header stesso
     if (BI->isUnconditional()) {
-        return L->getHeader();
+      return L->getHeader();
     }
     
     if (L->contains(BI->getSuccessor(0)))
-        return BI->getSuccessor(0);
+      return BI->getSuccessor(0);
     return BI->getSuccessor(1); 
   }
 
@@ -380,7 +380,7 @@ namespace {
     for (PHINode &PHI : BB->phis()) {
       int id = PHI.getBasicBlockIndex(Pred);
         if (id != -1)
-            return PHI.getIncomingValue(id);
+          return PHI.getIncomingValue(id);
     }
     return nullptr;
   }
@@ -389,7 +389,7 @@ namespace {
     for (PHINode &PHI : BB->phis()) {
       int id = PHI.getBasicBlockIndex(Pred);
         if (id != -1)
-            PHI.setIncomingValue(id, v);
+          PHI.setIncomingValue(id, v);
     }
   }
 
@@ -401,11 +401,11 @@ namespace {
       PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
       bool changed = false;
 
+      // Rendo tutti i loop in forma canonica se non lo sono già
       for(Loop* l : LI)
         if(!l->isLoopSimplifyForm())
           simplifyLoop(l, &DT, &LI, &SE, nullptr, nullptr, false);
-
-      // Usato il nome corretto della Struct: LoopPair
+      
       SmallVector<LoopPair, 4> Candidates;
       
       std::vector<Loop*> TopLevelLoops(LI.begin(), LI.end());
@@ -441,8 +441,8 @@ namespace {
         BasicBlock *Exit2    = L2->getUniqueExitBlock();
         
         if (!Header1 || !Header2 || !Latch1 || !Latch2 || !Exit1 || !Exit2) {
-            outs() << "ERRORE nel loop della funzione: " << F.getName() << "\n"; 
-            continue;
+          outs() << "ERRORE nel loop della funzione: " << F.getName() << "\n"; 
+          continue;
         }
 
         // Unifica IV
@@ -453,20 +453,19 @@ namespace {
         IV2->replaceAllUsesWith(IV1);
         IV2->eraseFromParent();
 
-        //Spostiamo le altre variabili PHI (es. accumulatori) da Header2 a Header1
+        // Spostiamo le altre variabili PHI (es. accumulatori) da Header2 a Header1
         for (PHINode &PN : make_early_inc_range(Header2->phis())) {
-            PN.moveBefore(Header1->getFirstNonPHI());
-            int Preheader2Idx = PN.getBasicBlockIndex(L2->getLoopPreheader());
-            if (Preheader2Idx != -1) {
-                PN.setIncomingBlock(Preheader2Idx, L1->getLoopPreheader());
-            }
+          PN.moveBefore(Header1->getFirstNonPHI());
+          int Preheader2Idx = PN.getBasicBlockIndex(L2->getLoopPreheader());
+          if (Preheader2Idx != -1) {
+            PN.setIncomingBlock(Preheader2Idx, L1->getLoopPreheader());
+          }
         }
 
         // Header2 non punta più ad Exit2
         Exit2->removePredecessor(Header2);
 
         // La branch che, in caso di condizione del loop falsa, portava al blocco Exit1 ora porta ad Exit2
-        //Header1->getTerminator()->replaceSuccessorWith(Exit1, Exit2);
         BasicBlock *ExitingBlock1 = L1->getExitingBlock();
 
         if (ExitingBlock1) {
@@ -479,7 +478,7 @@ namespace {
         // Il Latch1 prima riportava all'Header1, ora porta al primo blocco del body di L2 per eseguire le istruzioni di quest'ultimo
         Latch1->getTerminator()->replaceSuccessorWith(Header1, BodyEntry2);
 
-        //BodyEntry2 ora aspetta il flusso da Latch1, non più da Header2
+        // BodyEntry2 ora aspetta il flusso da Latch1, non più da Header2
         BodyEntry2->replacePhiUsesWith(Header2, Latch1);
 
         // Latch2 punta ora a Header1 invece che a Header2, diventando così il nuovo latch di L1
