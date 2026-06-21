@@ -343,7 +343,8 @@ namespace {
     }
   }
 
-  // Tramite questa fuzione cerco l'istruzione phi dentro il loop passato come parametro
+  // Tramite questa funzione cerco l'istruzione phi dentro il loop passato come parametro
+  //E nello specifico la induction variable canonica
   static PHINode *findCanonicalIndVar(Loop *L) {
     BasicBlock *Header = L->getHeader();
     BasicBlock *Preheader = L->getLoopPreheader();
