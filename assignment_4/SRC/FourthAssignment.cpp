@@ -361,15 +361,16 @@ namespace {
       auto *StepI = dyn_cast<Instruction>(StepV);
       if (!StepI) continue;
 
-      bool UsesPN = false;
+      //bool UsesPN = false;
 
       for(User* u : PN.users()){
         if(u == StepI){
-          UsesPN = true;
-          break;
+          //UsesPN = true;
+          //break;
+          return &PN;
         }
       }
-      return &PN;
+      //return &PN;
     }
     return nullptr;
   }
