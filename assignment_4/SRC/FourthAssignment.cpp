@@ -267,6 +267,17 @@ namespace {
   }
 
   void findFusionCandidates(const std::vector<Loop*> &Siblings, SmallVectorImpl<LoopPair> &Candidates, ScalarEvolution &SE, DominatorTree &DT, PostDominatorTree &PDT) {
+    /*
+    for (size_t i = 0; i < Siblings.size(); ++i) {
+    Loop *L1 = Siblings[i];
+
+    for (size_t j = i + 1; j < Siblings.size(); ++j) {
+        Loop *L2 = Siblings[j];
+        //logica per fondere L1 e L2
+        //logica per fondere L2 e L1
+    }
+    }
+    */
     for (Loop *L1 : Siblings) {
       bool isL1Guarded = (L1->getLoopGuardBranch() != nullptr);
 
